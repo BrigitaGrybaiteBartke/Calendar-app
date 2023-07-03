@@ -4,6 +4,7 @@ import './App.css';
 import Navigation from './components/Navigation';
 import SingleDayView from './components/SingleDayView';
 import { useCurrentDateState } from './components/Utils';
+import WeekDayView from './components/WeekDayView';
 
 
 function App() {
@@ -70,6 +71,7 @@ function App() {
         <Routes>
           <Route path='/' element={<Navigate to='/day' />} />
           <Route path='/day' element={<SingleDayView currentDateState={currentDateState} />} />
+          <Route path='/week' element={<WeekDayView currentDateState={currentDateState} />} />
         </Routes>
       </BrowserRouter>
     </>
