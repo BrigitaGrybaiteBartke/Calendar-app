@@ -1,26 +1,17 @@
 import '../App.css'
 import Timings from './Timings';
 import WeekDay from './WeekDay';
-import { hours, weekDayNames } from './Utils'
+import { getFirstDateOfWeek, getLastDateOfWeek, hours, weekDayNames } from './Utils'
 
 interface WeekDayViewProps {
     currentDateState: Date;
 }
 
 const WeekDayView = ({ currentDateState }: WeekDayViewProps) => {
-
-    const getFirstDateOfWeek = (d: Date = new Date()) => {
-        const date = new Date(d);
-        const day = date.getDay(); // 👉️ get day of week
-        const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-        return new Date(date.setDate(diff));
-    }
-
-    const firstDateOfWeek = getFirstDateOfWeek(currentDateState);
-
-    const lastDateOfWeek = new Date(firstDateOfWeek)
-    lastDateOfWeek.setDate(lastDateOfWeek.getDate() + 6)
     
+    const firstDateOfWeek = getFirstDateOfWeek(currentDateState);
+    const lastDateOfWeek = getLastDateOfWeek(currentDateState)
+ 
     return (
         <>
             <div className='main-container'>
@@ -31,7 +22,6 @@ const WeekDayView = ({ currentDateState }: WeekDayViewProps) => {
                         lastDateOfWeek={lastDateOfWeek}
                     />
                 </div>
-
                 <div className='timing-container'>
                     <Timings hours={hours} />
 

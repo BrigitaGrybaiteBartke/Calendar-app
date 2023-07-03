@@ -20,8 +20,8 @@ const WeekDay = ({ dayNames, firstDateOfWeek, lastDateOfWeek }: WeekDayProps) =>
                 {dayNames.map((day, dayIndex) => (
                     <div key={dayIndex} className='day'>
                         <>
-                        <span className='day-name'>{day}</span>
-                        <span className='month-day'>{wholeWeek[dayIndex].getDate()}</span>
+                            <span className='day-name'>{day}</span>
+                            <span className='month-day'>{wholeWeek[dayIndex].getDate()}</span>
                         </>
                     </div>
                 ))}

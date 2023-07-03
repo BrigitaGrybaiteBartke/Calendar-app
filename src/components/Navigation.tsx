@@ -1,9 +1,7 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { MdOutlineArrowBackIosNew } from 'react-icons/md';
 import { MdOutlineArrowForwardIos } from 'react-icons/md';
-
-
-import { today, months } from './Utils'
+import { months, getLastDateOfWeek } from './Utils'
 import { useState } from 'react';
 
 interface NavigationProps {
@@ -14,52 +12,57 @@ interface NavigationProps {
     setViewType: (viewType: string) => void;
 }
 
-
 const Navigation = ({ currentDateState, handleBackButton, handleForwardButton, setViewType }: NavigationProps) => {
 
     const location = useLocation();
 
-
-    // console.log(location.pathname)
     const [isActiveClass, setIsActiveClass] = useState(false)
 
-
     const handleIsActiveClass = (e: any) => {
-        console.log(e.target.value)
+        // console.log(e.target.value)
         // setIsActiveClass(!isActiveClass)
         // console.log(isActiveClass)
-
     }
 
-
-    const year = currentDateState.getFullYear()
     const monthDay: number = currentDateState.getDate()
+
+    const currentYear = currentDateState.getFullYear()
     const currentMonth = months[currentDateState.getMonth()]
 
-    const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate()
-    const allMonthDays: number[] = Array.from({ length: daysInMonth }, (v, i) => i + 1)
+    const lastDateOfWeek = getLastDateOfWeek(currentDateState)
+    const weekSecondMonth = months[lastDateOfWeek.getMonth()];
+
+    const weekSecondYear = lastDateOfWeek.getFullYear()
 
     const handleViewTypeChange = (type: string) => {
         setViewType(type)
-        console.log(type)
+        // console.log(type)
     }
-
 
     return (
         <>
             <nav className='navbar'>
-                <div className='navbar-button'>
+                <div className='navbar-date-button'>
                     <button className='button-backward' onClick={handleBackButton}><MdOutlineArrowBackIosNew /></button>
                     <button className='button-forward' onClick={handleForwardButton}><MdOutlineArrowForwardIos /></button>
                     <div className='navbar-date'>
                         {location.pathname === '/day' && (
-                            <span>{`${currentMonth} ${monthDay}th, ${year}`}</span>
+                            <span>{`${currentMonth} ${monthDay}, ${currentYear}`}</span>
                         )}
                         {location.pathname === '/week' && (
-                            <span>{`${currentMonth}, ${year}`}</span>
+                            <span>
+                                {currentYear === weekSecondYear
+                                    ? (currentMonth === weekSecondMonth
+                                        ? `${currentMonth}, ${currentYear}`
+                                        : `${currentMonth} - ${weekSecondMonth}, ${currentYear}`
+                                    )
+                                    : `${currentMonth}, ${currentYear} - ${weekSecondMonth}, ${weekSecondYear}`
+                                }
+                            </span>
                         )}
+
                         {location.pathname === '/month' && (
-                            <span>{`${currentMonth}, ${year}`}</span>
+                            <span>{`${currentMonth}, ${currentYear}`}</span>
                         )}
 
                     </div>

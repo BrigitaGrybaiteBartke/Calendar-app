@@ -10,7 +10,7 @@ const SingleDayView = ({ currentDateState }: SingleDayViewProps) => {
 
     const dayName = getDayName(currentDateState);
     const monthDay = getMonthDayNumber(currentDateState)
-
+    
     return (
         <>
             <div className="main-container">

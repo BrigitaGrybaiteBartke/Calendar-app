@@ -12,8 +12,6 @@ function App() {
   const { currentDateState, setCurrentDateState } = useCurrentDateState();
   const [viewType, setViewType] = useState('day')
 
-
-  // get Monday of current day ==========
   function getNextWeek(date: Date = new Date()) {
     const dateCopy = new Date(date.getTime());
     const nextMonday = new Date(
@@ -60,7 +58,7 @@ function App() {
   return (
     <>
       <BrowserRouter>
-      <Navigation
+        <Navigation
           currentDateState={currentDateState}
           handleBackButton={handleBackwardButton}
           handleForwardButton={handleForwardButton}

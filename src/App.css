@@ -136,12 +136,13 @@ body {
   align-items: center;
 }
 
-.navbar .navbar-button {
+.navbar .navbar-date-button {
   font-size: 25px;
   margin-left: auto;
   display: flex;
-  justify-content: center;
+  justify-content: start;
   align-items: center;
+  width: 30%;
 }
 
 .button-forward,
@@ -156,8 +157,9 @@ body {
   align-items: center;
 }
 
-.navbar .navbar-button .navbar-date {
-  margin-left: 25px;
+.navbar .navbar-date-button .navbar-date {
+  margin-left: 15px;
+  text-align: left;
 }
 
 .navbar .navbar-links {

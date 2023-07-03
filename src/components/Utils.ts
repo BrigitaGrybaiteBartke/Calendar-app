@@ -27,5 +27,20 @@ export const useCurrentDateState = () => {
     return { currentDateState, setCurrentDateState };
 };
 
+
+export const getFirstDateOfWeek = (d: Date = new Date()) => {
+    const date = new Date(d);
+    const day = date.getDay(); 
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+    return new Date(date.setDate(diff));
+}
+
+export const getLastDateOfWeek = (d: Date) => {
+    const lastDateOfWeek = new Date(d)
+    lastDateOfWeek.setDate(lastDateOfWeek.getDate() + 6)
+    return lastDateOfWeek
+}
+
+
 // hours
 export const hours = Array.from({ length: 24 }, (v, i) => i);
