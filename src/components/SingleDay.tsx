@@ -8,13 +8,11 @@ interface SingleDayProps {
 const SingleDay = ({ dayName, monthDay }: SingleDayProps) => {
 
     return (
-        <>
-            <div className='weekdays'>
+        <> 
                 <div className='day'>
                     <span className='day-name'>{dayName}</span>
                     <span className='month-day'>{monthDay}</span>
-                </div>
-            </div>
+                </div>  
         </>
     );
 };
