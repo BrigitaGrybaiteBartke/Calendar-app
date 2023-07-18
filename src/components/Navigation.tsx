@@ -1,80 +1,80 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { MdOutlineArrowBackIosNew } from 'react-icons/md';
 import { MdOutlineArrowForwardIos } from 'react-icons/md';
-import { months, getLastDateOfWeek } from './Utils'
+import { months, getLastDateOfWeek, today } from './utils/Utils'
 import { useState } from 'react';
+import './assets/Navbar.css'
 
 interface NavigationProps {
     currentDateState: Date;
-    handleBackButton: () => void;
+    handleBackwardButton: () => void;
     handleForwardButton: () => void;
     viewType: string;
-    setViewType: (viewType: string) => void;
+    handleViewTypeChange: (viewType: string) => void
 }
 
-const Navigation = ({ currentDateState, handleBackButton, handleForwardButton, setViewType }: NavigationProps) => {
+export default function Navigation ({ currentDateState, handleBackwardButton, handleForwardButton, viewType, handleViewTypeChange }: NavigationProps) {
 
-    const location = useLocation();
-
-    const [isActiveClass, setIsActiveClass] = useState(false)
-
-    const handleIsActiveClass = (e: any) => {
-        // console.log(e.target.value)
-        // setIsActiveClass(!isActiveClass)
-        // console.log(isActiveClass)
-    }
-
+    const [isActiveLink, setIsActiveLink] = useState(false)
+    
     const monthDay: number = currentDateState.getDate()
-
     const currentYear = currentDateState.getFullYear()
     const currentMonth = months[currentDateState.getMonth()]
-
     const lastDateOfWeek = getLastDateOfWeek(currentDateState)
     const weekSecondMonth = months[lastDateOfWeek.getMonth()];
-
     const weekSecondYear = lastDateOfWeek.getFullYear()
 
-    const handleViewTypeChange = (type: string) => {
-        setViewType(type)
-        // console.log(type)
+    const renderDateForNav = (viewType: string) => {
+        if (viewType === 'day') {
+            return (
+                <span>{`${currentMonth} ${monthDay}, ${currentYear}`}</span>
+            )
+        } else if (viewType === 'week') {
+            return (
+                <span>
+                    {currentYear === weekSecondYear
+                        ? (currentMonth === weekSecondMonth
+                            ? `${currentMonth}, ${currentYear}`
+                            : `${currentMonth} - ${weekSecondMonth}, ${currentYear}`
+                        )
+                        : `${currentMonth}, ${currentYear} - ${weekSecondMonth}, ${weekSecondYear}`
+                    }
+                </span>
+            )
+        } else if (viewType === 'month') {
+            return (
+                <span>{`${currentMonth}, ${currentYear}`}</span>
+            )
+        }
+        return null
     }
 
     return (
         <>
             <nav className='navbar'>
                 <div className='navbar-date-button'>
-                    <button className='button-backward' onClick={handleBackButton}><MdOutlineArrowBackIosNew /></button>
-                    <button className='button-forward' onClick={handleForwardButton}><MdOutlineArrowForwardIos /></button>
+                    <button
+                        className='button-backward'
+                        onClick={handleBackwardButton}
+                    >
+                        <MdOutlineArrowBackIosNew />
+                    </button>
+                    <button
+                        className='button-forward'
+                        onClick={handleForwardButton}
+                    >
+                        <MdOutlineArrowForwardIos />
+                    </button>
                     <div className='navbar-date'>
-                        {location.pathname === '/day' && (
-                            <span>{`${currentMonth} ${monthDay}, ${currentYear}`}</span>
-                        )}
-                        {location.pathname === '/week' && (
-                            <span>
-                                {currentYear === weekSecondYear
-                                    ? (currentMonth === weekSecondMonth
-                                        ? `${currentMonth}, ${currentYear}`
-                                        : `${currentMonth} - ${weekSecondMonth}, ${currentYear}`
-                                    )
-                                    : `${currentMonth}, ${currentYear} - ${weekSecondMonth}, ${weekSecondYear}`
-                                }
-                            </span>
-                        )}
-
-                        {location.pathname === '/month' && (
-                            <span>{`${currentMonth}, ${currentYear}`}</span>
-                        )}
-
+                        {renderDateForNav(viewType)}
                     </div>
                 </div>
-
                 <ul className='navbar-links'>
                     <div className='menu'>
                         <li>
                             <NavLink
                                 to="./day"
-                                className={`menu-link ${isActiveClass ? 'active' : ''}`}
-                                onChange={(e) => handleIsActiveClass(e)}
+                                className="menu-link active"
                                 onClick={() => handleViewTypeChange('day')}
                             >
                                 Day
@@ -93,6 +93,7 @@ const Navigation = ({ currentDateState, handleBackButton, handleForwardButton, s
                             <NavLink
                                 to="./month"
                                 className="menu-link"
+                                onClick={() => handleViewTypeChange('month')}
                             >
                                 Month
                             </NavLink>
@@ -103,5 +104,3 @@ const Navigation = ({ currentDateState, handleBackButton, handleForwardButton, s
         </>
     );
 };
-
-export default Navigation;
