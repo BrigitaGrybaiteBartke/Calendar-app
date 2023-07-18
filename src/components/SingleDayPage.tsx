@@ -14,9 +14,9 @@ interface SingleDayPageProps {
 interface Task {
     id: string;
     name: string;
-    startDate: string,
-    endDate: string,
-    formattedHours?: string
+    date: string,
+    startHour: string,
+    endHour: string
 }
 
 const SingleDayPage = ({ currentDateState }: SingleDayPageProps) => {
@@ -31,9 +31,10 @@ const SingleDayPage = ({ currentDateState }: SingleDayPageProps) => {
 
     const [tasks, setTasks] = useState<Task[]>([]);
     const [taskDetails, setTaskDetails] = useState({
-        name: "",
-        startDate: "",
-        endDate: "",
+        name: '',
+        date: '',
+        startHour: '',
+        endHour: ''
     })
 
     const handleInputChange = (e: any) => {
@@ -48,11 +49,14 @@ const SingleDayPage = ({ currentDateState }: SingleDayPageProps) => {
     const handleFormSubmit = (e: any) => {
         e.preventDefault();
 
+        const selectedDate = taskDetails.date ? taskDetails.date : currentDateState.toISOString()
+
         const newTask = {
             id: Date.now().toString(),
             name: taskDetails.name,
-            startDate: taskDetails.startDate,
-            endDate: taskDetails.endDate
+            date: selectedDate,
+            startHour: taskDetails.startHour,
+            endHour: taskDetails.endHour
         }
         setTasks((prevTasks) => [...prevTasks, newTask]);
     }
@@ -122,9 +126,11 @@ const SingleDayPage = ({ currentDateState }: SingleDayPageProps) => {
             const movedHours = Math.floor(movedMinutes / 60);
             const movedMinutesRemainder = movedMinutes % 60;
 
-
             const startDateCoords = new Date(currentDateState)
             startDateCoords.setHours(movedHours, movedMinutesRemainder, 0, 0);
+
+            const endDateCoords = new Date(startDateCoords);
+            endDateCoords.setMinutes(startDateCoords.getMinutes() + minutesPerCell);
 
             const options = {
                 hour12: false,
@@ -132,22 +138,16 @@ const SingleDayPage = ({ currentDateState }: SingleDayPageProps) => {
                 minute: "2-digit",
             } as Intl.DateTimeFormatOptions;
 
-            const formattedHours = startDateCoords.toLocaleTimeString([], options);
-
-            console.log(typeof formattedHours)
-            // const endDateCoords = new Date(startDateCoords.getTime() + minutesPerCell * 60000);
+            const startHour = startDateCoords.toLocaleTimeString([], options);
+            const endHour = endDateCoords.toLocaleTimeString([], options);
 
             const updatedTasks = tasks.map((task) => {
                 if (task.id.toString() === id) {
-                    const startDateCoords = new Date(currentDateState)
-                    startDateCoords.setHours(0, minutesPerCell * timingCellIndex, 0, 0)
-                    const endDateCoords = new Date(startDateCoords.getTime() + minutesPerCell * 60000 - 1);
-
                     return {
                         ...task,
-                        startDate: startDateCoords.toString(),
-                        endDate: endDateCoords.toString(),
-                        formattedHours: formattedHours
+                        startDateCoords,
+                        startHour,
+                        endHour
                     };
                 }
                 return task;
@@ -167,7 +167,7 @@ const SingleDayPage = ({ currentDateState }: SingleDayPageProps) => {
         container.addEventListener('dragover', dragOver);
         container.addEventListener('drop', drop);
 
-    }, [])
+    }, [ tasks])
 
     return (
         <>
@@ -186,23 +186,27 @@ const SingleDayPage = ({ currentDateState }: SingleDayPageProps) => {
                     <label>Start Date:</label>
                     <input
                         type="date"
-                        name="startDate"
+                        name="date"
                         onChange={handleInputChange}
-                        value={taskDetails.startDate}
+                        value={taskDetails.date}
                     />
-
-                    <label>End Date:</label>
+                    <label>Start Hour:</label>
                     <input
-                        type="date"
-                        name="endDate"
-                        value={taskDetails.endDate}
+                        type="time"
+                        name="startHour"
                         onChange={handleInputChange}
+                        value={taskDetails.startHour}
+                    />
+                    <label>End Hour:</label>
+                    <input
+                        type="time"
+                        name="endHour"
+                        onChange={handleInputChange}
+                        value={taskDetails.endHour}
                     />
                     <button type="submit" className="submit-button">Add</button>
                 </form>
             </div>
-
-
 
             <div className="container-day">
                 <div className="day-container">
@@ -211,7 +215,6 @@ const SingleDayPage = ({ currentDateState }: SingleDayPageProps) => {
                 <div className="timing-container">
                     <Timings hours={hours} />
                 </div>
-
 
                 <div className="subgrid-single-day-container"
                     ref={containerRef}
@@ -224,8 +227,9 @@ const SingleDayPage = ({ currentDateState }: SingleDayPageProps) => {
                             ref={boxRef}
                             id={task.id}
                         >
-                            <p>Task Name: {task.name}</p>
-                            <p>Moved hours: {task.formattedHours}</p>
+                            <div>Task Name: {task.name}</div>
+                            <div>Start date: {task.date}</div>
+                            <div>{task.startHour}&nbsp;-&nbsp;{task.endHour}</div>                            
                         </div>
                     ))}
                 </div>
