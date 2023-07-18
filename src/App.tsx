@@ -1,45 +1,31 @@
 import { useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import './App.css';
+import { getNextWeek, getPreviousWeek, useCurrentDateState } from './components/utils/Utils';
 import Navigation from './components/Navigation';
-import SingleDayView from './components/SingleDayView';
-import { useCurrentDateState } from './components/Utils';
-import WeekDayView from './components/WeekDayView';
+import SingleDayView from './components/SingleDayPage';
+import WeekDayView from './components/WeekDayPage';
+import './App.css';
 
-
-function App() {
-
+export default function App() {
   const { currentDateState, setCurrentDateState } = useCurrentDateState();
-  const [viewType, setViewType] = useState('day')
 
-  function getNextWeek(date: Date = new Date()) {
-    const dateCopy = new Date(date.getTime());
-    const nextMonday = new Date(
-      dateCopy.setDate(
-        dateCopy.getDate() + ((7 - dateCopy.getDay() + 1) % 7 || 7),
-      ),
-    );
-    return nextMonday;
+  const getviewType = () => {
+    const currentPath = window.location.pathname
+    if (currentPath === '/day') {
+      return 'day'
+    } else if (currentPath === '/week') {
+      return 'week'
+    } else if (currentPath === '/month') {
+      return 'month'
+    }
+    return 'day'
   }
 
-  function getPreviousWeek(date: Date = new Date()) {
-    const dateCopy = new Date(date.getTime());
-    const peviousMonday = new Date(
-      dateCopy.setDate(
-        dateCopy.getDate() - ((7 - dateCopy.getDay() + 1) % 7 || 7),
-      ),
-    );
-    return peviousMonday;
-  }
+  const [viewType, setViewType] = useState(getviewType())
 
-  const handleForwardButton = () => {
-    if (viewType === 'day') {
-      const nextDate = new Date(currentDateState);
-      nextDate.setDate(nextDate.getDate() + 1);
-      setCurrentDateState(nextDate);
-    } else if (viewType === 'week') {
-      const nextWeek = getNextWeek(currentDateState)
-      setCurrentDateState(nextWeek)
+  const handleViewTypeChange = (viewType: string) => {
+    if (viewType) {
+      setViewType(viewType)
     }
   }
 
@@ -54,18 +40,27 @@ function App() {
     }
   };
 
+  const handleForwardButton = () => {
+    if (viewType === 'day') {
+      const nextDate = new Date(currentDateState);
+      nextDate.setDate(nextDate.getDate() + 1);
+      setCurrentDateState(nextDate);
+    } else if (viewType === 'week') {
+      const nextWeek = getNextWeek(currentDateState)
+      setCurrentDateState(nextWeek)
+    }
+  }
 
   return (
     <>
       <BrowserRouter>
         <Navigation
           currentDateState={currentDateState}
-          handleBackButton={handleBackwardButton}
+          handleBackwardButton={handleBackwardButton}
           handleForwardButton={handleForwardButton}
           viewType={viewType}
-          setViewType={setViewType}
+          handleViewTypeChange={handleViewTypeChange}
         />
-
         <Routes>
           <Route path='/' element={<Navigate to='/day' />} />
           <Route path='/day' element={<SingleDayView currentDateState={currentDateState} />} />
@@ -75,5 +70,3 @@ function App() {
     </>
   );
 }
-
-export default App;
