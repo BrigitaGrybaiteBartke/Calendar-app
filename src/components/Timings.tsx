@@ -1,21 +1,22 @@
-import React from 'react';
+import React from "react";
 
 interface TimingProps {
-    hours: number[];
+  hours: number[];
 }
 
 const Timings = ({ hours }: TimingProps) => {
-
-    return (
-        <>
-            <div className='timings'>
-                <div className="time"></div>
-                {hours.map((hour: number, hourIndex: number) => (
-                    <div key={hourIndex} className='time'>{hour.toString().padStart(2, '0')}:00</div>
-                ))}
-            </div>
-        </>
-    );
+  return (
+    <>
+      <div className="timings">
+        {hours.map((hour: number, hourIndex: number) => (
+          <div key={hourIndex} className="time">
+            <span>{hour.toString().padStart(2, "0")}:00</span>
+            <div className="time-line"></div>
+          </div>
+        ))}
+      </div>
+    </>
+  );
 };
 
 export default Timings;
