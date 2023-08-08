@@ -9,6 +9,7 @@
   width: 100%;
   position: relative;
   height: 50px;
+  font-size: 12px;
 }
 
 .time > span {
@@ -20,7 +21,7 @@
 .time-line {
   position: absolute;
   top: 20%;
-  left: 6%;
+  left: 5%;
   width: 100%;
   border: 1px solid rgb(213, 212, 212);
 }
