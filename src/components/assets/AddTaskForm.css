@@ -1,48 +1,65 @@
 .side-grid {
-    grid-column: 1 / 2;
-    grid-row: 2;
-    display: grid;
-    grid-template-rows: 130px repeat(4, 200px)
+  grid-column: 1 / 2;
+  grid-row: 2 / -1;
+  display: grid;
+  grid-template-rows: 85px 320px repeat(4, auto);
 }
 
 .form {
-    border-radius: 5px;
-    padding: 20px;
-    margin: 20px;
-    grid-row: 2 / span 1;
+  grid-row: 2 / span 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: stretch;
+  padding: 10px;
+  margin: 10px;
+  border: 0.5px solid rgb(174, 173, 173);
+  border-radius: 5px;
 }
 
-.input-box{
-display: flex;
-flex-direction: column;
-padding: 10px;
+.input-container {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  padding: 10px;
+  position: relative;
+}
+
+.input-container label {
+  font-size: 12px;
+  width: 30%;
 }
 
 input {
-    width: 100%;
-    padding: 12px 20px;
-    margin: 8px 0;
+  width: 100%;
+  font-size: 11px;
+  border: none;
+  border-bottom: 0.5px solid grey;
+  border-radius: 5px;
+  padding: 10px 20px;
+  outline: none;
 }
 
-.input-box:first-of-type input{
-    border: none;
-    border-bottom: 1px solid grey;
+input[type="date"],
+input[type="time"] {
+  width: 55%;
 }
 
-.input:active {
-    outline: 2px solid rgb(89, 250, 156);
+input:focus {
+  border-bottom: 1px solid grey;
+  border-radius: 5px;
 }
 
 .submit-button {
-    background-color: #4CAF50;
-    color: white;
-    padding: 14px 20px;
-    margin: 8px 0;
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 14px;
+  background-color: #4caf50;
+  color: white;
+  cursor: pointer;
+  margin-top: 10px;
 }
 
 .submit-button:hover {
-    background-color: #45a049;
+  background-color: #45a049;
 }

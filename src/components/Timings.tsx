@@ -9,10 +9,12 @@ const Timings = ({ hours }: TimingProps) => {
     <>
       <div className="timings">
         {hours.map((hour: number, hourIndex: number) => (
-          <div key={hourIndex} className="time">
-            <span>{hour.toString().padStart(2, "0")}:00</span>
-            <div className="time-line"></div>
-          </div>
+          <>
+             <div key={hourIndex} className="time">
+              <div className="horizontal-line" />
+              <span>{hour.toString().padStart(2, "0")}:00</span>
+            </div>
+          </>
         ))}
       </div>
     </>

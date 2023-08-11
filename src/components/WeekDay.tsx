@@ -5,12 +5,14 @@ interface WeekDayProps {
   dayNames: string[];
   firstDateOfWeek: Date;
   lastDateOfWeek: Date;
+  isToday: (dateToCheck: Date) => boolean;
 }
 
 const WeekDay = ({
   dayNames,
   firstDateOfWeek,
   lastDateOfWeek,
+  isToday,
 }: WeekDayProps) => {
   const wholeWeek: Date[] = [];
 
@@ -26,12 +28,14 @@ const WeekDay = ({
     <>
       <div className="weekdays">
         {dayNames.map((day, dayIndex) => (
-          <div key={dayIndex} className="day day-box">
+          <div key={dayIndex} className="day">
             <>
               <span className="day-name" data-day={day}>
                 {day}
               </span>
-              <span className="month-day">{wholeWeek[dayIndex].getDate()}</span>
+              <span className={`month-day ${isToday(wholeWeek[dayIndex]) ? 'today' : ''}`}>
+                {wholeWeek[dayIndex].getDate()}
+              </span>
             </>
           </div>
         ))}

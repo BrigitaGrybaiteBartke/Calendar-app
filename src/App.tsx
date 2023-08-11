@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import {
   getNextWeek,
   getPreviousWeek,
+  today,
   useCurrentDateState,
 } from "./components/utils/Utils";
 import Navigation from "./components/Navigation";
@@ -21,12 +22,11 @@ interface Task {
 
 export default function App() {
   const { currentDateState, setCurrentDateState } = useCurrentDateState();
-
   const [tasks, setTasks] = useState<Task[]>([]);
 
-  const handleAddTask = (newTask: Task, selectedDate: string ) => {
+  const handleAddTask = (newTask: Task, selectedDate: string) => {
     setTasks((prevTasks) => [...prevTasks, newTask]);
-    setCurrentDateState(new Date(selectedDate))   
+    setCurrentDateState(new Date(selectedDate));
   };
 
   const getviewType = () => {
@@ -71,20 +71,32 @@ export default function App() {
     }
   };
 
+  const isToday = (dateToCheck: Date) => {
+    return (
+      dateToCheck.getFullYear() === today.getFullYear() &&
+      dateToCheck.getMonth() === today.getMonth() &&
+      dateToCheck.getDay() === today.getDay() &&
+      dateToCheck.getDate() === today.getDate()
+    );
+  };
+
+
+
   return (
     <>
       <BrowserRouter>
         <Navigation
           currentDateState={currentDateState}
+          setCurrentDateState={setCurrentDateState}
           handleBackwardButton={handleBackwardButton}
           handleForwardButton={handleForwardButton}
           viewType={viewType}
           handleViewTypeChange={handleViewTypeChange}
         />
-        <AddTaskForm 
-        handleAddTask={handleAddTask} 
-        currentDateState={currentDateState}
-        setCurentDateState={setCurrentDateState}
+        <AddTaskForm
+          handleAddTask={handleAddTask}
+          currentDateState={currentDateState}
+          setCurentDateState={setCurrentDateState}
         />
         <Routes>
           <Route path="/" element={<Navigate to="/day" />} />
@@ -95,12 +107,20 @@ export default function App() {
                 currentDateState={currentDateState}
                 tasks={tasks}
                 setTasks={setTasks}
+                isToday={isToday}
               />
             }
           />
           <Route
             path="/week"
-            element={<WeekDayPage currentDateState={currentDateState} tasks={tasks} setTasks={setTasks} />}
+            element={
+              <WeekDayPage
+                currentDateState={currentDateState}
+                tasks={tasks}
+                setTasks={setTasks}
+                isToday={isToday}
+              />
+            }
           />
         </Routes>
       </BrowserRouter>

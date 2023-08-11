@@ -54,7 +54,6 @@ const AddTaskForm = ({
       handleAddTask(newTask, selectedDate);
 
       setCurentDateState(new Date(selectedDate));
-      // console.log(selectedDate)
     }
 
     setTaskDetails({
@@ -63,63 +62,58 @@ const AddTaskForm = ({
       startHour: "",
       endHour: "",
     });
-
-    // Update currentDateState to match the selectedDate
   };
 
   return (
     <>
       <div className="side-grid">
-        <div className="form">
-          <form onSubmit={handleFormSubmit}>
-            <div className="input-box">
-              {/* <label>Enter Task</label> */}
-              <input
-                type="text"
-                name="name"
-                placeholder="Enter task..."
-                onChange={handleInputChange}
-                value={taskDetails.name}
-                //   required
-              />
-            </div>
-            <div className="input-box">
-              <label>Start Date:</label>
-              <input
-                type="date"
-                name="date"
-                onChange={handleInputChange}
-                value={taskDetails.date}
-                //   required
-              />
-            </div>
-            <div className="input-box">
-              <label>Start Hour:</label>
-              <input
-                type="time"
-                name="startHour"
-                onChange={(e) => {
-                  handleInputChange(e);
-                }}
-                value={taskDetails.startHour}
-                // required
-              />
-            </div>
-            <div className="input-box">
-              <label>End Hour:</label>
-              <input
-                type="time"
-                name="endHour"
-                onChange={handleInputChange}
-                value={taskDetails.endHour}
-                //   required
-              />
-            </div>
-            <button type="submit" className="submit-button">
-              Add
-            </button>
-          </form>
-        </div>
+        <form onSubmit={handleFormSubmit} className="form">
+          <div className="input-container">
+            <input
+              type="text"
+              name="name"
+              placeholder="Enter task..."
+              onChange={handleInputChange}
+              value={taskDetails.name}
+              // required
+            />
+          </div>
+          <div className="input-container">
+            <label>Start Date:</label>
+            <input
+              type="date"
+              name="date"
+              onChange={handleInputChange}
+              value={taskDetails.date}
+              // required
+            />
+          </div>
+          <div className="input-container">
+            <label>Start Hour:</label>
+            <input
+              type="time"
+              name="startHour"
+              onChange={(e) => {
+                handleInputChange(e);
+              }}
+              value={taskDetails.startHour}
+              // required
+            />
+          </div>
+          <div className="input-container">
+            <label>End Hour:</label>
+            <input
+              type="time"
+              name="endHour"
+              onChange={handleInputChange}
+              value={taskDetails.endHour}
+              //   required
+            />
+          </div>
+          <button type="submit" className="submit-button">
+            Add
+          </button>
+        </form>
       </div>
     </>
   );

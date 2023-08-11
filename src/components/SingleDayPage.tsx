@@ -18,12 +18,14 @@ interface SingleDayPageProps {
   currentDateState: Date;
   tasks: Task[];
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
+  isToday: (dateToCheck: Date) => boolean;
 }
 
 const SingleDayPage = ({
   currentDateState,
   tasks,
   setTasks,
+  isToday,
 }: SingleDayPageProps) => {
   const dayName = getDayName(currentDateState);
   const monthDay = getMonthDayNumber(currentDateState);
@@ -36,16 +38,14 @@ const SingleDayPage = ({
     (task) => task.date === currentDateState.toISOString().substring(0, 10)
   );
 
-  
-const calculateTopPosition = (taskStartTime: string) => {
-  const [hours, minutes] = taskStartTime.split(":").map(Number);
-
-  const totalMinutes = hours * 60 + minutes;
-  const timingCellHeight = 50;
-  const minutesPerCell = 60;
-  const timingCellIndex = Math.floor(totalMinutes / minutesPerCell);
-  return `${timingCellIndex * timingCellHeight + 10}px`;
-};
+  const calculateTopPosition = (taskStartTime: string) => {
+    const [hours, minutes] = taskStartTime.split(":").map(Number);
+    const totalMinutes = hours * 60 + minutes;
+    const timingCellHeight = 50;
+    const minutesPerCell = 60;
+    const timingCellIndex = Math.floor(totalMinutes / minutesPerCell);
+    return `${timingCellIndex * timingCellHeight + 10}px`;
+  };
 
   useEffect(() => {
     if (!boxRefs.current || !containerRef.current) return;
@@ -137,9 +137,7 @@ const calculateTopPosition = (taskStartTime: string) => {
       setTasks(updatedTasks);
 
       if (draggable.className.includes("box")) {
-        draggable.style.top = `${
-            timingCellIndex * timingCellHeight + 10
-          }px)`
+        draggable.style.top = `${timingCellIndex * timingCellHeight + 10}px)`;
         draggable.classList.remove("hide");
         e.target.appendChild(draggable);
       }
@@ -172,34 +170,39 @@ const calculateTopPosition = (taskStartTime: string) => {
     <>
       <div className="content-grid">
         <div className="day-container">
+          <div className="vertical-line vertical-line-1"></div>
           <div className="single-day">
-            <SingleDay 
-            dayName={dayName} 
-            monthDay={monthDay} 
-              />
+            <SingleDay
+              dayName={dayName}
+              monthDay={monthDay}
+              isToday={isToday}
+              currentDateState={currentDateState}
+            />
           </div>
           <div className="timing-container">
             <Timings hours={hours} />
           </div>
-
-          <div className="subgrid-single-day-container grid-view" ref={containerRef}>
+          <div
+            className="subgrid-single-day-container grid-view"
+            ref={containerRef}
+          >
             {tasksForCurrentDay &&
-              tasksForCurrentDay.map((task, index) => (          
+              tasksForCurrentDay.map((task, index) => (
                 <div
                   key={task.id || ""}
                   className="box"
                   draggable={true}
                   ref={(ref) => (boxRefs.current[index] = ref)}
                   id={task.id}
-                  style={{ top: calculateTopPosition(task.startHour) }} 
-
+                  style={{ top: calculateTopPosition(task.startHour) }}
                 >
-                  <div>Task Name: {task.name}</div>
-                  <div>Start date: {task.date}</div>
+                  {task.name.length > 90
+                    ? `${task.name.substring(0, 90).concat("...")}`
+                    : task.name}
+                  <div>{task.date}</div>
                   <div>
                     {task.startHour}&nbsp;-&nbsp;{task.endHour}
                   </div>
-                
                 </div>
               ))}
           </div>

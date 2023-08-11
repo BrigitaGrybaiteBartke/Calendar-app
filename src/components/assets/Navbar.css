@@ -24,7 +24,7 @@
   border: 1px solid grey;
 }
 
-.button-today:hover {
+.navbar .navbar-today .button-today:hover {
   color: rgb(113, 113, 116);
 }
 
@@ -37,8 +37,8 @@
   min-width: 35%;
 }
 
-.button-forward,
-.button-backward {
+.navbar .navbar-date-bar .button-backward,
+.navbar .navbar-date-bar .button-forward {
   border: none;
   background: transparent;
   padding: 10px;
@@ -52,6 +52,7 @@
 .navbar .navbar-date-bar .navbar-date {
   margin-left: 20px;
   text-align: left;
+  background-color: ;
 }
 
 .navbar .navbar-links {
@@ -69,7 +70,7 @@
   padding: 20px 14px;
 }
 
-.navbar .navbar-links .menu li .menu-link {
+.navbar .navbar-links .menu .menu-link {
   text-decoration: none;
   font-size: 12px;
   color: rgb(0, 0, 0);
@@ -81,7 +82,7 @@
   color: rgb(113, 113, 116);
 }
 
-.active {
+.navbar .navbar-links .menu li .active {
   border: 1px solid grey;
   border-radius: 5px;
   padding: 5px 10px 5px;
