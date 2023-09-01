@@ -1,19 +1,18 @@
-import React from "react";
 import "./assets/WeekDay.css";
 
 interface WeekDayProps {
-  dayNames: string[];
+  weekDayNames: string[];
   firstDateOfWeek: Date;
   lastDateOfWeek: Date;
   isToday: (dateToCheck: Date) => boolean;
 }
 
-const WeekDay = ({
-  dayNames,
+export default function WeekDay({
+  weekDayNames,
   firstDateOfWeek,
   lastDateOfWeek,
   isToday,
-}: WeekDayProps) => {
+}: WeekDayProps) {
   const wholeWeek: Date[] = [];
 
   for (
@@ -27,13 +26,17 @@ const WeekDay = ({
   return (
     <>
       <div className="weekdays">
-        {dayNames.map((day, dayIndex) => (
+        {weekDayNames.map((day, dayIndex) => (
           <div key={dayIndex} className="day">
             <>
               <span className="day-name" data-day={day}>
                 {day}
               </span>
-              <span className={`month-day ${isToday(wholeWeek[dayIndex]) ? 'today' : ''}`}>
+              <span
+                className={`month-day ${
+                  isToday(wholeWeek[dayIndex]) ? "today" : ""
+                }`}
+              >
                 {wholeWeek[dayIndex].getDate()}
               </span>
             </>
@@ -42,6 +45,4 @@ const WeekDay = ({
       </div>
     </>
   );
-};
-
-export default WeekDay;
+}

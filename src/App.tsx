@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import {
   getNextWeek,
@@ -15,7 +15,7 @@ import WeekDayPage from "./components/WeekDayPage";
 interface Task {
   id: string;
   name: string;
-  date: string;
+  date: Date;
   startHour: string;
   endHour: string;
 }
@@ -24,9 +24,49 @@ export default function App() {
   const { currentDateState, setCurrentDateState } = useCurrentDateState();
   const [tasks, setTasks] = useState<Task[]>([]);
 
-  const handleAddTask = (newTask: Task, selectedDate: string) => {
-    setTasks((prevTasks) => [...prevTasks, newTask]);
+  const storage = {
+    set: (key: string, value: any) => {
+      localStorage.setItem(key, JSON.stringify(value));
+    },
+    get: (key: string, defaultValue?: Task[]): Task[] => {
+      const value = localStorage.getItem(key);
+      return value ? JSON.parse(value) : defaultValue;
+    },
+    remove: (key: string) => {
+      localStorage.removeItem(key);
+    },
+  };
+
+  useEffect(() => {
+    const localStorageTasks = storage.get("tasks", []);
+    setTasks(localStorageTasks);
+  }, []);
+
+  const handleAddTask = (newTask: Task, selectedDate: Date) => {
+    const timeString = newTask.startHour;
+
+    const [hours, minutes] = timeString.split(":");
+
+    const parsedHours = parseInt(hours);
+    const parsedMinutes = parseInt(minutes);
+
+    const newSelectedDate = new Date(selectedDate); // Clone the selected date
+    newSelectedDate.setHours(parsedHours, parsedMinutes, 0, 0); // Set the selected time
+
+    const utcDate = new Date(
+      newSelectedDate.getTime() - newSelectedDate.getTimezoneOffset() * 60000
+    );
+
+    const updatedTask = {
+      ...newTask,
+      date: utcDate, // Store as UTC ISO string
+    };
+
+    setTasks((prevTasks) => [...prevTasks, updatedTask]);
     setCurrentDateState(new Date(selectedDate));
+
+    // Store tasks with UTC date in local storage
+    storage.set("tasks", [...tasks, updatedTask]);
   };
 
   const getviewType = () => {
@@ -80,8 +120,6 @@ export default function App() {
     );
   };
 
-
-
   return (
     <>
       <BrowserRouter>
@@ -96,7 +134,7 @@ export default function App() {
         <AddTaskForm
           handleAddTask={handleAddTask}
           currentDateState={currentDateState}
-          setCurentDateState={setCurrentDateState}
+          // setCurentDateState={setCurrentDateState}
         />
         <Routes>
           <Route path="/" element={<Navigate to="/day" />} />
@@ -108,6 +146,7 @@ export default function App() {
                 tasks={tasks}
                 setTasks={setTasks}
                 isToday={isToday}
+                storage={storage}
               />
             }
           />
@@ -119,6 +158,7 @@ export default function App() {
                 tasks={tasks}
                 setTasks={setTasks}
                 isToday={isToday}
+                storage={storage}
               />
             }
           />

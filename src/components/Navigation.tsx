@@ -60,7 +60,6 @@ export default function Navigation({
               Today
             </button>
           </div>
-
           <div className="navbar-date-bar">
             <button className="button-backward" onClick={handleBackwardButton}>
               <MdOutlineArrowBackIosNew />
@@ -70,7 +69,6 @@ export default function Navigation({
             </button>
             <div className="navbar-date">{renderDateForNav(viewType)}</div>
           </div>
-
           <ul className="navbar-links">
             <div className="menu">
               <li>

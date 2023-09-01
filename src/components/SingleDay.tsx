@@ -1,6 +1,4 @@
-import React from "react";
 import "./assets/SingleDay.css";
-import { today } from "./utils/Utils";
 
 interface SingleDayProps {
   dayName: string;
@@ -9,12 +7,12 @@ interface SingleDayProps {
   currentDateState: Date;
 }
 
-const SingleDay = ({
+export default function SingleDay ({
   dayName,
   monthDay,
   isToday,
   currentDateState,
-}: SingleDayProps) => {
+}: SingleDayProps) {
   return (
     <>
       <div className="day">
@@ -25,6 +23,4 @@ const SingleDay = ({
       </div>
     </>
   );
-};
-
-export default SingleDay;
+}

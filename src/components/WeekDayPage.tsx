@@ -10,10 +10,16 @@ import {
 import "./assets/WeekDayPage.css";
 import { useEffect, useRef, useState } from "react";
 
+interface Storage {
+  set: (key: string, value: any) => void;
+  get: (key: string, defaultValue?: Task[]) => Task[];
+  remove: (key: string) => void;
+}
+
 interface Task {
   id: string;
   name: string;
-  date: string;
+  date: Date;
   startHour: string;
   endHour: string;
 }
@@ -23,14 +29,16 @@ interface WeekDayPageProps {
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
   currentDateState: Date;
   isToday: (dateToCheck: Date) => boolean;
+  storage: Storage;
 }
 
-const WeekDayPage = ({
+export default function WeekDayPage({
   tasks,
   setTasks,
   currentDateState,
   isToday,
-}: WeekDayPageProps) => {
+  storage,
+}: WeekDayPageProps) {
   const firstDateOfWeek = getFirstDateOfWeek(currentDateState);
   const lastDateOfWeek = getLastDateOfWeek(currentDateState);
 
@@ -38,13 +46,12 @@ const WeekDayPage = ({
   const boxRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [isDragging, setIsDragging] = useState(false);
 
-  const tasksForCurrentWeek = tasks.filter(
-    (task) =>
-      new Date(task.date) >= firstDateOfWeek &&
-      new Date(task.date) <= lastDateOfWeek
-  );
+  const tasksForCurrentWeek = tasks.filter((task) => {
+    const taskDate = new Date(task.date);
+    return taskDate >= firstDateOfWeek && taskDate <= lastDateOfWeek;
+  });
 
-  const calculateTopPosition = (taskStartTime: string) => {
+  const calculateTopPosition = (taskStartTime: string, dayIndex: number) => {
     const [hours, minutes] = taskStartTime.split(":").map(Number);
     const totalMinutes = hours * 60 + minutes;
     const timingCellHeight = 50;
@@ -72,8 +79,6 @@ const WeekDayPage = ({
         if (targetElement) targetElement.classList.add("hide");
       }, 0);
     };
-
-    const drag = (e: any) => {};
 
     const dragEnd = (e: any) => {
       setIsDragging(false);
@@ -103,18 +108,15 @@ const WeekDayPage = ({
       const rect = e.target.getBoundingClientRect();
 
       const updatedY = e.clientY - rect.top;
-      const updatedX = e.clientX - rect.left;
-
       const timingCellHeight = 50;
       const minutesPerCell = 60;
       const timingCellIndex = Math.floor(updatedY / timingCellHeight);
-
       const movedMinutes = timingCellIndex * minutesPerCell;
       const movedHours = Math.floor(movedMinutes / 60);
       const movedMinutesRemainder = movedMinutes % 60;
 
+      const updatedX = e.clientX - rect.left;
       const dayBoxIndex = Math.floor(updatedX / (rect.width / 7));
-      const dayBox = document.querySelectorAll(".day-box")[dayBoxIndex];
 
       const startDateCoords = new Date(currentDateState);
       startDateCoords.setDate(firstDateOfWeek.getDate() + dayBoxIndex);
@@ -139,7 +141,7 @@ const WeekDayPage = ({
         if (task.id.toString() === id) {
           return {
             ...task,
-            startDateCoords,
+            date: startDateCoords,
             startHour,
             endHour,
           };
@@ -151,7 +153,6 @@ const WeekDayPage = ({
 
       if (draggable.className.includes("box")) {
         draggable.style.top = `${timingCellIndex * timingCellHeight + 10}px)`;
-
         draggable.style.left = `${leftPosition}px`;
 
         draggable.classList.remove("hide");
@@ -195,7 +196,7 @@ const WeekDayPage = ({
 
           <div className="weekdays-container">
             <WeekDay
-              dayNames={weekDayNames}
+              weekDayNames={weekDayNames}
               firstDateOfWeek={firstDateOfWeek}
               lastDateOfWeek={lastDateOfWeek}
               isToday={isToday}
@@ -206,29 +207,40 @@ const WeekDayPage = ({
           </div>
           <div className="subgrid-weekdays-container" ref={containerRef}>
             {tasksForCurrentWeek &&
-              tasksForCurrentWeek.map((task, index) => (
-                <div
-                  key={task.id || ""}
-                  className="box"
-                  draggable={true}
-                  ref={(ref) => (boxRefs.current[index] = ref)}
-                  id={task.id}
-                  style={{
-                    top: calculateTopPosition(task.startHour),
-                  }}
-                >
-                  <div>Task Name: {task.name}</div>
-                  <div>Start date: {task.date}</div>
-                  <div>
-                    {task.startHour}&nbsp;-&nbsp;{task.endHour}
-                  </div>
-                </div>
-              ))}
+              tasksForCurrentWeek.map(
+                (task, index) =>
+                  containerRef.current && (
+                    <div
+                      key={task.id || ""}
+                      className="box"
+                      draggable={true}
+                      ref={(ref) => (boxRefs.current[index] = ref)}
+                      id={task.id}
+                      style={{
+                        top: calculateTopPosition(
+                          task.startHour,
+                          new Date(task.date).getDay()
+                        ),
+                        left: `${
+                          ((new Date(task.date).getDay() + 6) % 7) * (100 / 7)
+                        }%`,
+                      }}
+                    >
+                      <>
+                        <div>{task.name}</div>
+                        {task.date instanceof Date && (
+                          <div>{task.date.toLocaleDateString()}</div>
+                        )}
+                        <div>
+                          {task.startHour}&nbsp;-&nbsp;{task.endHour}
+                        </div>
+                      </>
+                    </div>
+                  )
+              )}
           </div>
         </div>
       </div>
     </>
   );
-};
-
-export default WeekDayPage;
+}

@@ -6,10 +6,16 @@ import "./assets/Timings.css";
 import "./assets/SingleDayPage.css";
 import "./assets/AddTaskForm.css";
 
+interface Storage {
+  set: (key: string, value: any) => void;
+  get: (key: string, defaultValue?: Task[]) => Task[];
+  remove: (key: string) => void;
+}
+
 interface Task {
   id: string;
   name: string;
-  date: string;
+  date: Date;
   startHour: string;
   endHour: string;
 }
@@ -19,26 +25,35 @@ interface SingleDayPageProps {
   tasks: Task[];
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
   isToday: (dateToCheck: Date) => boolean;
+  storage: Storage;
 }
 
-const SingleDayPage = ({
+export default function SingleDayPage({
   currentDateState,
   tasks,
   setTasks,
   isToday,
-}: SingleDayPageProps) => {
+  storage,
+}: SingleDayPageProps) {
   const dayName = getDayName(currentDateState);
   const monthDay = getMonthDayNumber(currentDateState);
-
   const containerRef = useRef<HTMLDivElement>(null);
   const boxRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [isDragging, setIsDragging] = useState(false);
 
   const tasksForCurrentDay = tasks.filter(
-    (task) => task.date === currentDateState.toISOString().substring(0, 10)
+    (task) => {
+      const newTask = new Date(task.date);
+
+      return (
+        newTask.getDate() === currentDateState.getDate() &&
+        newTask.getMonth() === currentDateState.getMonth() &&
+        newTask.getFullYear() === currentDateState.getFullYear()
+      );
+    }
   );
 
-  const calculateTopPosition = (taskStartTime: string) => {
+  const calculateTopPosition = (taskStartTime: string, dayIndex: number) => {
     const [hours, minutes] = taskStartTime.split(":").map(Number);
     const totalMinutes = hours * 60 + minutes;
     const timingCellHeight = 50;
@@ -48,9 +63,8 @@ const SingleDayPage = ({
   };
 
   useEffect(() => {
-    if (!boxRefs.current || !containerRef.current) return;
+    if (!containerRef.current || !boxRefs.current) return;
 
-    // const box = boxRefs.current;
     const container = containerRef.current;
 
     const dragStart = (e: any) => {
@@ -68,8 +82,6 @@ const SingleDayPage = ({
       }, 0);
     };
 
-    const drag = (e: any) => {};
-
     const dragEnd = (e: any) => {
       setIsDragging(false);
       const targetElement = e.target as HTMLDivElement | null;
@@ -81,6 +93,7 @@ const SingleDayPage = ({
 
     const dragOver = (e: any) => {
       setIsDragging(true);
+
       if (e.dataTransfer.types[0] === "text/plain") {
         e.preventDefault();
       }
@@ -88,6 +101,7 @@ const SingleDayPage = ({
 
     const drop = (e: any) => {
       e.preventDefault();
+
       setIsDragging(false);
 
       const id = e.dataTransfer.getData("text/plain");
@@ -98,7 +112,6 @@ const SingleDayPage = ({
       const rect = e.target.getBoundingClientRect();
 
       const updatedY = e.clientY - rect.top;
-
       const timingCellHeight = 50;
       const minutesPerCell = 60;
       const timingCellIndex = Math.floor(updatedY / timingCellHeight);
@@ -126,7 +139,7 @@ const SingleDayPage = ({
         if (task.id.toString() === id) {
           return {
             ...task,
-            startDateCoords,
+            date: startDateCoords,
             startHour,
             endHour,
           };
@@ -135,6 +148,8 @@ const SingleDayPage = ({
       });
 
       setTasks(updatedTasks);
+
+      storage.set("tasks", updatedTasks);
 
       if (draggable.className.includes("box")) {
         draggable.style.top = `${timingCellIndex * timingCellHeight + 10}px)`;
@@ -194,12 +209,19 @@ const SingleDayPage = ({
                   draggable={true}
                   ref={(ref) => (boxRefs.current[index] = ref)}
                   id={task.id}
-                  style={{ top: calculateTopPosition(task.startHour) }}
+                  style={{
+                    top: calculateTopPosition(
+                      task.startHour,
+                      new Date(task.date).getDay()
+                    ),
+                  }}
                 >
                   {task.name.length > 90
                     ? `${task.name.substring(0, 90).concat("...")}`
                     : task.name}
-                  <div>{task.date}</div>
+                  {task.date instanceof Date && (
+                    <div>{task.date.toLocaleDateString()}</div>
+                  )}
                   <div>
                     {task.startHour}&nbsp;-&nbsp;{task.endHour}
                   </div>
@@ -210,6 +232,4 @@ const SingleDayPage = ({
       </div>
     </>
   );
-};
-
-export default SingleDayPage;
+}

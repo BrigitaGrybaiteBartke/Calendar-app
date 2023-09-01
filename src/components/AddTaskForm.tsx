@@ -1,64 +1,93 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 interface Task {
   id: string;
   name: string;
-  date: string;
+  date: Date;
   startHour: string;
   endHour: string;
 }
 
 interface AddTaskFormProps {
-  handleAddTask?: (newTask: Task, selectedDate: string) => void;
+  handleAddTask?: (newTask: Task, selectedDate: Date) => void;
   currentDateState: Date;
-  setCurentDateState: React.Dispatch<React.SetStateAction<Date>>;
 }
 
-const AddTaskForm = ({
+export default function AddTaskForm({
   handleAddTask,
   currentDateState,
-  setCurentDateState,
-}: AddTaskFormProps) => {
+}: AddTaskFormProps) {
+  const [selectedDate, setSelectedDate] = useState<Date>(currentDateState);
   const [taskDetails, setTaskDetails] = useState({
     name: "",
-    date: "",
+    date: selectedDate,
     startHour: "",
     endHour: "",
   });
 
-  const handleInputChange = (e: any) => {
+  useEffect(() => {
+    setSelectedDate(currentDateState);
+  }, [currentDateState]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
+
     const { name, value } = e.target;
-    setTaskDetails((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+
+    if (name === "date") {
+      const newSelectedDate = new Date(value);
+      newSelectedDate.setHours(0, 0, 0, 0);
+
+      setSelectedDate(newSelectedDate);
+
+      setTaskDetails((prev) => ({
+        ...prev,
+        [name]: new Date(value),
+      }));
+    } else {
+      setTaskDetails((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
-  const handleFormSubmit = (e: any) => {
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (handleAddTask) {
-      const selectedDate = taskDetails.date
-        ? taskDetails.date
-        : currentDateState.toISOString().substring(0, 10);
+    if (
+      !taskDetails.name ||
+      !taskDetails.date ||
+      !taskDetails.startHour ||
+      !taskDetails.endHour
+    ) {
+      return;
+    }
 
+    const newSelectedDate = new Date(selectedDate);
+    const timeString = taskDetails.startHour;
+    const [hours, minutes] = timeString.split(":");
+
+    const parsedHours = parseInt(hours);
+    const parsedMinutes = parseInt(minutes);
+
+    newSelectedDate.setHours(parsedHours, parsedMinutes, 0, 0);
+
+    if (handleAddTask) {
       const newTask = {
         id: Date.now().toString(),
         name: taskDetails.name,
-        date: selectedDate,
+        date: newSelectedDate,
         startHour: taskDetails.startHour,
         endHour: taskDetails.endHour,
       };
 
-      handleAddTask(newTask, selectedDate);
-
-      setCurentDateState(new Date(selectedDate));
+      handleAddTask(newTask, newSelectedDate);
     }
 
     setTaskDetails({
       name: "",
-      date: "",
+      date: selectedDate,
       startHour: "",
       endHour: "",
     });
@@ -78,13 +107,14 @@ const AddTaskForm = ({
               // required
             />
           </div>
+
           <div className="input-container">
             <label>Start Date:</label>
             <input
               type="date"
               name="date"
               onChange={handleInputChange}
-              value={taskDetails.date}
+              // value={selectedDate.toISOString().split("T")[0]}
               // required
             />
           </div>
@@ -117,6 +147,4 @@ const AddTaskForm = ({
       </div>
     </>
   );
-};
-
-export default AddTaskForm;
+}
