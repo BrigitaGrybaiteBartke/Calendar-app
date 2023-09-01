@@ -1,10 +1,10 @@
-import "./assets/WeekDay.css";
+import './assets/WeekDay.css'
 
 interface WeekDayProps {
-  weekDayNames: string[];
-  firstDateOfWeek: Date;
-  lastDateOfWeek: Date;
-  isToday: (dateToCheck: Date) => boolean;
+  weekDayNames: string[]
+  firstDateOfWeek: Date
+  lastDateOfWeek: Date
+  isToday: (dateToCheck: Date) => boolean
 }
 
 export default function WeekDay({
@@ -13,14 +13,14 @@ export default function WeekDay({
   lastDateOfWeek,
   isToday,
 }: WeekDayProps) {
-  const wholeWeek: Date[] = [];
+  const wholeWeek: Date[] = []
 
   for (
     let i = new Date(firstDateOfWeek);
     i <= lastDateOfWeek;
     i.setDate(i.getDate() + 1)
   ) {
-    wholeWeek.push(new Date(i));
+    wholeWeek.push(new Date(i))
   }
 
   return (
@@ -34,7 +34,7 @@ export default function WeekDay({
               </span>
               <span
                 className={`month-day ${
-                  isToday(wholeWeek[dayIndex]) ? "today" : ""
+                  isToday(wholeWeek[dayIndex]) ? 'today' : ''
                 }`}
               >
                 {wholeWeek[dayIndex].getDate()}
@@ -44,5 +44,5 @@ export default function WeekDay({
         ))}
       </div>
     </>
-  );
+  )
 }

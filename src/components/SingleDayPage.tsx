@@ -1,31 +1,31 @@
-import React, { useEffect, useRef, useState } from "react";
-import SingleDay from "./SingleDay";
-import Timings from "./Timings";
-import { getDayName, getMonthDayNumber, hours } from "./utils/Utils";
-import "./assets/Timings.css";
-import "./assets/SingleDayPage.css";
-import "./assets/AddTaskForm.css";
+import React, { useEffect, useRef, useState } from 'react'
+import SingleDay from './SingleDay'
+import Timings from './Timings'
+import { getDayName, getMonthDayNumber, hours } from './utils/Utils'
+import './assets/Timings.css'
+import './assets/SingleDayPage.css'
+import './assets/AddTaskForm.css'
 
 interface Storage {
-  set: (key: string, value: any) => void;
-  get: (key: string, defaultValue?: Task[]) => Task[];
-  remove: (key: string) => void;
+  set: (key: string, value: any) => void
+  get: (key: string, defaultValue?: Task[]) => Task[]
+  remove: (key: string) => void
 }
 
 interface Task {
-  id: string;
-  name: string;
-  date: Date;
-  startHour: string;
-  endHour: string;
+  id: string
+  name: string
+  date: Date
+  startHour: string
+  endHour: string
 }
 
 interface SingleDayPageProps {
-  currentDateState: Date;
-  tasks: Task[];
-  setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
-  isToday: (dateToCheck: Date) => boolean;
-  storage: Storage;
+  currentDateState: Date
+  tasks: Task[]
+  setTasks: React.Dispatch<React.SetStateAction<Task[]>>
+  isToday: (dateToCheck: Date) => boolean
+  storage: Storage
 }
 
 export default function SingleDayPage({
@@ -35,105 +35,103 @@ export default function SingleDayPage({
   isToday,
   storage,
 }: SingleDayPageProps) {
-  const dayName = getDayName(currentDateState);
-  const monthDay = getMonthDayNumber(currentDateState);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const boxRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const [isDragging, setIsDragging] = useState(false);
+  const dayName = getDayName(currentDateState)
+  const monthDay = getMonthDayNumber(currentDateState)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const boxRefs = useRef<(HTMLDivElement | null)[]>([])
+  const [isDragging, setIsDragging] = useState(false)
 
-  const tasksForCurrentDay = tasks.filter(
-    (task) => {
-      const newTask = new Date(task.date);
+  const tasksForCurrentDay = tasks.filter((task) => {
+    const newTask = new Date(task.date)
 
-      return (
-        newTask.getDate() === currentDateState.getDate() &&
-        newTask.getMonth() === currentDateState.getMonth() &&
-        newTask.getFullYear() === currentDateState.getFullYear()
-      );
-    }
-  );
+    return (
+      newTask.getDate() === currentDateState.getDate() &&
+      newTask.getMonth() === currentDateState.getMonth() &&
+      newTask.getFullYear() === currentDateState.getFullYear()
+    )
+  })
 
   const calculateTopPosition = (taskStartTime: string, dayIndex: number) => {
-    const [hours, minutes] = taskStartTime.split(":").map(Number);
-    const totalMinutes = hours * 60 + minutes;
-    const timingCellHeight = 50;
-    const minutesPerCell = 60;
-    const timingCellIndex = Math.floor(totalMinutes / minutesPerCell);
-    return `${timingCellIndex * timingCellHeight + 10}px`;
-  };
+    const [hours, minutes] = taskStartTime.split(':').map(Number)
+    const totalMinutes = hours * 60 + minutes
+    const timingCellHeight = 50
+    const minutesPerCell = 60
+    const timingCellIndex = Math.floor(totalMinutes / minutesPerCell)
+    return `${timingCellIndex * timingCellHeight + 10}px`
+  }
 
   useEffect(() => {
-    if (!containerRef.current || !boxRefs.current) return;
+    if (!containerRef.current || !boxRefs.current) return
 
-    const container = containerRef.current;
+    const container = containerRef.current
 
     const dragStart = (e: any) => {
-      setIsDragging(true);
+      setIsDragging(true)
 
-      const targetElement = e.target as HTMLDivElement | null;
+      const targetElement = e.target as HTMLDivElement | null
 
-      if (targetElement && targetElement.className.includes("box")) {
-        targetElement.classList.add("dragging");
-        e.dataTransfer.setData("text/plain", targetElement.id);
+      if (targetElement && targetElement.className.includes('box')) {
+        targetElement.classList.add('dragging')
+        e.dataTransfer.setData('text/plain', targetElement.id)
       }
 
       setTimeout(() => {
-        if (targetElement) targetElement.classList.add("hide");
-      }, 0);
-    };
+        if (targetElement) targetElement.classList.add('hide')
+      }, 0)
+    }
 
     const dragEnd = (e: any) => {
-      setIsDragging(false);
-      const targetElement = e.target as HTMLDivElement | null;
+      setIsDragging(false)
+      const targetElement = e.target as HTMLDivElement | null
 
-      if (targetElement && targetElement.className.includes("box")) {
-        targetElement.classList.remove("dragging");
+      if (targetElement && targetElement.className.includes('box')) {
+        targetElement.classList.remove('dragging')
       }
-    };
+    }
 
     const dragOver = (e: any) => {
-      setIsDragging(true);
+      setIsDragging(true)
 
-      if (e.dataTransfer.types[0] === "text/plain") {
-        e.preventDefault();
+      if (e.dataTransfer.types[0] === 'text/plain') {
+        e.preventDefault()
       }
-    };
+    }
 
     const drop = (e: any) => {
-      e.preventDefault();
+      e.preventDefault()
 
-      setIsDragging(false);
+      setIsDragging(false)
 
-      const id = e.dataTransfer.getData("text/plain");
-      const draggable = document.getElementById(id);
+      const id = e.dataTransfer.getData('text/plain')
+      const draggable = document.getElementById(id)
 
-      if (!id || !draggable || !container) return;
+      if (!id || !draggable || !container) return
 
-      const rect = e.target.getBoundingClientRect();
+      const rect = e.target.getBoundingClientRect()
 
-      const updatedY = e.clientY - rect.top;
-      const timingCellHeight = 50;
-      const minutesPerCell = 60;
-      const timingCellIndex = Math.floor(updatedY / timingCellHeight);
+      const updatedY = e.clientY - rect.top
+      const timingCellHeight = 50
+      const minutesPerCell = 60
+      const timingCellIndex = Math.floor(updatedY / timingCellHeight)
 
-      const movedMinutes = timingCellIndex * minutesPerCell;
-      const movedHours = Math.floor(movedMinutes / 60);
-      const movedMinutesRemainder = movedMinutes % 60;
+      const movedMinutes = timingCellIndex * minutesPerCell
+      const movedHours = Math.floor(movedMinutes / 60)
+      const movedMinutesRemainder = movedMinutes % 60
 
-      const startDateCoords = new Date(currentDateState);
-      startDateCoords.setHours(movedHours, movedMinutesRemainder, 0, 0);
+      const startDateCoords = new Date(currentDateState)
+      startDateCoords.setHours(movedHours, movedMinutesRemainder, 0, 0)
 
-      const endDateCoords = new Date(startDateCoords);
-      endDateCoords.setMinutes(startDateCoords.getMinutes() + minutesPerCell);
+      const endDateCoords = new Date(startDateCoords)
+      endDateCoords.setMinutes(startDateCoords.getMinutes() + minutesPerCell)
 
       const options = {
         hour12: false,
-        hour: "2-digit",
-        minute: "2-digit",
-      } as Intl.DateTimeFormatOptions;
+        hour: '2-digit',
+        minute: '2-digit',
+      } as Intl.DateTimeFormatOptions
 
-      const startHour = startDateCoords.toLocaleTimeString([], options);
-      const endHour = endDateCoords.toLocaleTimeString([], options);
+      const startHour = startDateCoords.toLocaleTimeString([], options)
+      const endHour = endDateCoords.toLocaleTimeString([], options)
 
       const updatedTasks = tasks.map((task) => {
         if (task.id.toString() === id) {
@@ -142,44 +140,44 @@ export default function SingleDayPage({
             date: startDateCoords,
             startHour,
             endHour,
-          };
+          }
         }
-        return task;
-      });
+        return task
+      })
 
-      setTasks(updatedTasks);
+      setTasks(updatedTasks)
 
-      storage.set("tasks", updatedTasks);
+      storage.set('tasks', updatedTasks)
 
-      if (draggable.className.includes("box")) {
-        draggable.style.top = `${timingCellIndex * timingCellHeight + 10}px)`;
-        draggable.classList.remove("hide");
-        e.target.appendChild(draggable);
+      if (draggable.className.includes('box')) {
+        draggable.style.top = `${timingCellIndex * timingCellHeight + 10}px)`
+        draggable.classList.remove('hide')
+        e.target.appendChild(draggable)
       }
-    };
+    }
 
     boxRefs.current.forEach((boxRef) => {
       if (boxRef) {
-        boxRef.addEventListener("dragstart", dragStart);
-        boxRef.addEventListener("dragend", dragEnd);
+        boxRef.addEventListener('dragstart', dragStart)
+        boxRef.addEventListener('dragend', dragEnd)
       }
-    });
+    })
 
-    container.addEventListener("dragover", dragOver);
-    container.addEventListener("drop", drop);
+    container.addEventListener('dragover', dragOver)
+    container.addEventListener('drop', drop)
 
     return () => {
       boxRefs.current.forEach((boxRef) => {
         if (boxRef) {
-          boxRef.removeEventListener("dragstart", dragStart);
-          boxRef.removeEventListener("dragend", dragEnd);
+          boxRef.removeEventListener('dragstart', dragStart)
+          boxRef.removeEventListener('dragend', dragEnd)
         }
-      });
+      })
 
-      container.removeEventListener("dragover", dragOver);
-      container.removeEventListener("drop", drop);
-    };
-  }, [tasks, currentDateState]);
+      container.removeEventListener('dragover', dragOver)
+      container.removeEventListener('drop', drop)
+    }
+  }, [tasks, currentDateState])
 
   return (
     <>
@@ -204,7 +202,7 @@ export default function SingleDayPage({
             {tasksForCurrentDay &&
               tasksForCurrentDay.map((task, index) => (
                 <div
-                  key={task.id || ""}
+                  key={task.id || ''}
                   className="box"
                   draggable={true}
                   ref={(ref) => (boxRefs.current[index] = ref)}
@@ -212,12 +210,12 @@ export default function SingleDayPage({
                   style={{
                     top: calculateTopPosition(
                       task.startHour,
-                      new Date(task.date).getDay()
+                      new Date(task.date).getDay(),
                     ),
                   }}
                 >
                   {task.name.length > 90
-                    ? `${task.name.substring(0, 90).concat("...")}`
+                    ? `${task.name.substring(0, 90).concat('...')}`
                     : task.name}
                   {task.date instanceof Date && (
                     <div>{task.date.toLocaleDateString()}</div>
@@ -231,5 +229,5 @@ export default function SingleDayPage({
         </div>
       </div>
     </>
-  );
+  )
 }

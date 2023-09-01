@@ -1,16 +1,16 @@
-import { NavLink } from "react-router-dom";
-import { MdOutlineArrowBackIosNew } from "react-icons/md";
-import { MdOutlineArrowForwardIos } from "react-icons/md";
-import { months, getLastDateOfWeek, today } from "./utils/Utils";
-import "./assets/Navbar.css";
+import { NavLink } from 'react-router-dom'
+import { MdOutlineArrowBackIosNew } from 'react-icons/md'
+import { MdOutlineArrowForwardIos } from 'react-icons/md'
+import { months, getLastDateOfWeek, today } from './utils/Utils'
+import './assets/Navbar.css'
 
 interface NavigationProps {
-  currentDateState: Date;
-  setCurrentDateState: React.Dispatch<React.SetStateAction<Date>>;
-  handleBackwardButton: () => void;
-  handleForwardButton: () => void;
-  viewType: string;
-  handleViewTypeChange: (viewType: string) => void;
+  currentDateState: Date
+  setCurrentDateState: React.Dispatch<React.SetStateAction<Date>>
+  handleBackwardButton: () => void
+  handleForwardButton: () => void
+  viewType: string
+  handleViewTypeChange: (viewType: string) => void
 }
 
 export default function Navigation({
@@ -21,17 +21,17 @@ export default function Navigation({
   viewType,
   handleViewTypeChange,
 }: NavigationProps) {
-  const monthDay: number = currentDateState.getDate();
-  const currentYear = currentDateState.getFullYear();
-  const currentMonth = months[currentDateState.getMonth()];
-  const lastDateOfWeek = getLastDateOfWeek(currentDateState);
-  const weekSecondMonth = months[lastDateOfWeek.getMonth()];
-  const weekSecondYear = lastDateOfWeek.getFullYear();
+  const monthDay: number = currentDateState.getDate()
+  const currentYear = currentDateState.getFullYear()
+  const currentMonth = months[currentDateState.getMonth()]
+  const lastDateOfWeek = getLastDateOfWeek(currentDateState)
+  const weekSecondMonth = months[lastDateOfWeek.getMonth()]
+  const weekSecondYear = lastDateOfWeek.getFullYear()
 
   const renderDateForNav = (viewType: string) => {
-    if (viewType === "day") {
-      return <span>{`${currentYear}, ${currentMonth} ${monthDay}`}</span>;
-    } else if (viewType === "week") {
+    if (viewType === 'day') {
+      return <span>{`${currentYear}, ${currentMonth} ${monthDay}`}</span>
+    } else if (viewType === 'week') {
       return (
         <span>
           {currentYear === weekSecondYear
@@ -40,16 +40,16 @@ export default function Navigation({
               : `${currentYear}, ${currentMonth} - ${weekSecondMonth}`
             : `${currentMonth}, ${currentYear} - ${weekSecondMonth}, ${weekSecondYear}`}
         </span>
-      );
-    } else if (viewType === "month") {
-      return <span>{`${currentMonth}, ${currentYear}`}</span>;
+      )
+    } else if (viewType === 'month') {
+      return <span>{`${currentMonth}, ${currentYear}`}</span>
     }
-    return null;
-  };
+    return null
+  }
 
   const handleTodayClick = () => {
-    setCurrentDateState(today);
-  };
+    setCurrentDateState(today)
+  }
 
   return (
     <>
@@ -74,8 +74,8 @@ export default function Navigation({
               <li>
                 <NavLink
                   to="./day"
-                  className={`menu-link ${viewType === "day" && "active"}`}
-                  onClick={() => handleViewTypeChange("day")}
+                  className={`menu-link ${viewType === 'day' && 'active'}`}
+                  onClick={() => handleViewTypeChange('day')}
                 >
                   Day
                 </NavLink>
@@ -83,8 +83,8 @@ export default function Navigation({
               <li>
                 <NavLink
                   to="./week"
-                  className={`menu-link ${viewType === "week" && "active"}`}
-                  onClick={() => handleViewTypeChange("week")}
+                  className={`menu-link ${viewType === 'week' && 'active'}`}
+                  onClick={() => handleViewTypeChange('week')}
                 >
                   Week
                 </NavLink>
@@ -92,8 +92,8 @@ export default function Navigation({
               <li>
                 <NavLink
                   to="./month"
-                  className={`menu-link ${viewType === "month" && "active"}`}
-                  onClick={() => handleViewTypeChange("month")}
+                  className={`menu-link ${viewType === 'month' && 'active'}`}
+                  onClick={() => handleViewTypeChange('month')}
                 >
                   Month
                 </NavLink>
@@ -103,5 +103,5 @@ export default function Navigation({
         </nav>
       </div>
     </>
-  );
+  )
 }
