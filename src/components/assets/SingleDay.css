@@ -1,9 +1,10 @@
 .single-day .day {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: start;
   align-items: center;
   width: 15%;
+  height: 100%;
 }
 
 .single-day .day .day-name {
@@ -15,7 +16,7 @@
 .single-day .day .month-day {
   padding: 5px;
   margin: 5px;
-  font-size: 22px;
+  font-size: 16px;
 }
 
 .single-day .day .today {
