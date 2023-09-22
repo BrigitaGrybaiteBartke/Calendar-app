@@ -13,3 +13,15 @@ body {
   grid-template-columns: 300px auto;
   grid-template-rows: 90px auto;
 }
+
+.side-grid {
+  grid-column: 1 / 2;
+  grid-row: 2 / -1;
+  display: grid;
+  grid-template-rows: 85px 320px 320px repeat(3, auto);
+}
+
+.flex {
+  display: flex;
+  flex-direction: column;
+}

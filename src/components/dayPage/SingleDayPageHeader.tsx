@@ -1,18 +1,18 @@
-import './assets/SingleDay.css'
+import './SingleDayPageHeader.css'
 
-interface SingleDayProps {
+interface SingleDayPageHeaderProps {
   dayName: string
   monthDay: number
   isToday: (dateToCheck: Date) => boolean
   currentDateState: Date
 }
 
-export default function SingleDay({
+export default function SingleDayPageHeader({
   dayName,
   monthDay,
   isToday,
   currentDateState,
-}: SingleDayProps) {
+}: SingleDayPageHeaderProps) {
   return (
     <>
       <div className="day">

@@ -1,18 +1,18 @@
-import './assets/WeekDay.css'
+import './WeekDayPageHeader.css'
 
-interface WeekDayProps {
+interface WeekDayPageHeaderProps {
   weekDayNames: string[]
   firstDateOfWeek: Date
   lastDateOfWeek: Date
   isToday: (dateToCheck: Date) => boolean
 }
 
-export default function WeekDay({
+export default function WeekDayPageHeader({
   weekDayNames,
   firstDateOfWeek,
   lastDateOfWeek,
   isToday,
-}: WeekDayProps) {
+}: WeekDayPageHeaderProps) {
   const wholeWeek: Date[] = []
 
   for (

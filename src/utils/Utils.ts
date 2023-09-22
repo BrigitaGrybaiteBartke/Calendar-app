@@ -1,5 +1,15 @@
 import { useState } from 'react'
 
+interface Task {
+  id: string
+  name: string
+  date: Date
+  startHour: string
+  endHour: string
+}
+
+export const hours = Array.from({ length: 24 }, (v, i) => i)
+
 export const dayNames: string[] = [
   'Sunday',
   'Monday',
@@ -96,4 +106,56 @@ export const getPreviousWeek = (date: Date = new Date()) => {
   return peviousMonday
 }
 
-export const hours = Array.from({ length: 24 }, (v, i) => i)
+export const getviewType = () => {
+  const currentPath = window.location.pathname
+  if (currentPath === '/day') {
+    return 'day'
+  } else if (currentPath === '/week') {
+    return 'week'
+  } else if (currentPath === '/month') {
+    return 'month'
+  }
+  return 'day'
+}
+
+export const convertToUTCDateObject = (date: Date) => {
+  const utcTimeISO = date.toISOString()
+  const utcDate = new Date(utcTimeISO)
+  return utcDate
+}
+
+export const filterTasksForCurrentDate = (
+  tasks: Task[],
+  startDate: Date,
+  endDate: Date,
+) => {
+  return tasks.filter((task) => {
+    const taskDate = new Date(task.date)
+    return taskDate >= startDate && taskDate <= endDate
+  })
+}
+
+export const storage = {
+  set: (key: string, value: any) => {
+    localStorage.setItem(
+      key,
+      JSON.stringify(
+        value.map((task: Task) => ({
+          ...task,
+          date: task.date.toISOString(),
+        })),
+      ),
+    )
+  },
+  get: (key: string, defaultValue: Task[] = []) => {
+    const tasks = JSON.parse(localStorage.getItem(key) || '[]')
+
+    return tasks.map((task: Task) => ({
+      ...task,
+      date: new Date(task.date),
+    }))
+  },
+  remove: (key: string) => {
+    localStorage.removeItem(key)
+  },
+}

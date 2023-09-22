@@ -1,12 +1,6 @@
-.side-grid {
-  grid-column: 1 / 2;
-  grid-row: 2 / -1;
-  display: grid;
-  grid-template-rows: 85px 320px repeat(4, auto);
-}
-
-.form {
-  grid-row: 2 / span 1;
+.form-add {
+  grid-row: 2 / 3;
+ 
   display: flex;
   flex-direction: column;
   justify-content: start;

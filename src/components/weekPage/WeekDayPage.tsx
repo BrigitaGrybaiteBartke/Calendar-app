@@ -1,20 +1,17 @@
-import '../App.css'
-import Timings from './Timings'
-import WeekDay from './WeekDay'
+import React from 'react'
+import '../../App.css'
+import Timings from '../timings/Timings'
+import WeekDay from './WeekDayPageHeader'
 import {
+  convertToUTCDateObject,
+  filterTasksForCurrentDate,
   getFirstDateOfWeek,
   getLastDateOfWeek,
   hours,
   weekDayNames,
-} from './utils/Utils'
-import './assets/WeekDayPage.css'
+} from '../../utils/Utils'
+import './WeekDayPage.css'
 import { useEffect, useRef, useState } from 'react'
-
-interface Storage {
-  set: (key: string, value: any) => void
-  get: (key: string, defaultValue?: Task[]) => Task[]
-  remove: (key: string) => void
-}
 
 interface Task {
   id: string
@@ -24,12 +21,16 @@ interface Task {
   endHour: string
 }
 
+type TasksWithPosition = Task & {
+  top: number
+  left: string
+}
+
 interface WeekDayPageProps {
   tasks: Task[]
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>
   currentDateState: Date
   isToday: (dateToCheck: Date) => boolean
-  storage: Storage
 }
 
 export default function WeekDayPage({
@@ -37,7 +38,6 @@ export default function WeekDayPage({
   setTasks,
   currentDateState,
   isToday,
-  storage,
 }: WeekDayPageProps) {
   const firstDateOfWeek = getFirstDateOfWeek(currentDateState)
   const lastDateOfWeek = getLastDateOfWeek(currentDateState)
@@ -46,19 +46,36 @@ export default function WeekDayPage({
   const boxRefs = useRef<(HTMLDivElement | null)[]>([])
   const [isDragging, setIsDragging] = useState(false)
 
-  const tasksForCurrentWeek = tasks.filter((task) => {
-    const taskDate = new Date(task.date)
-    return taskDate >= firstDateOfWeek && taskDate <= lastDateOfWeek
-  })
+  const currentTasks = filterTasksForCurrentDate(
+    tasks,
+    firstDateOfWeek,
+    lastDateOfWeek,
+  )
 
   const calculateTopPosition = (taskStartTime: string, dayIndex: number) => {
     const [hours, minutes] = taskStartTime.split(':').map(Number)
     const totalMinutes = hours * 60 + minutes
+
     const timingCellHeight = 50
     const minutesPerCell = 60
     const timingCellIndex = Math.floor(totalMinutes / minutesPerCell)
-    return `${timingCellIndex * timingCellHeight + 10}px`
+
+    return timingCellIndex * timingCellHeight + 10
   }
+
+  const calculateLeftPosition = (taskDate: Date) => {
+    const dayIndex = (taskDate.getDay() + 6) % 7
+
+    const cellWidth = 100 / 7
+    const leftCoords = dayIndex * cellWidth
+    return `${leftCoords}%`
+  }
+
+  const tasksWithPosition: TasksWithPosition[] = currentTasks.map((task) => ({
+    ...task,
+    top: calculateTopPosition(task.startHour, new Date(task.date).getDay()),
+    left: calculateLeftPosition(new Date(task.date)),
+  }))
 
   useEffect(() => {
     if (!boxRefs.current || !containerRef.current) return
@@ -108,9 +125,11 @@ export default function WeekDayPage({
       const rect = e.target.getBoundingClientRect()
 
       const updatedY = e.clientY - rect.top
+
       const timingCellHeight = 50
       const minutesPerCell = 60
       const timingCellIndex = Math.floor(updatedY / timingCellHeight)
+
       const movedMinutes = timingCellIndex * minutesPerCell
       const movedHours = Math.floor(movedMinutes / 60)
       const movedMinutesRemainder = movedMinutes % 60
@@ -122,7 +141,10 @@ export default function WeekDayPage({
       startDateCoords.setDate(firstDateOfWeek.getDate() + dayBoxIndex)
       startDateCoords.setHours(movedHours, movedMinutesRemainder, 0, 0)
 
+      const utcDate = convertToUTCDateObject(startDateCoords)
+
       const timingCellWidth = rect.width / 7
+
       const leftPosition = dayBoxIndex * timingCellWidth
 
       const endDateCoords = new Date(startDateCoords)
@@ -141,7 +163,7 @@ export default function WeekDayPage({
         if (task.id.toString() === id) {
           return {
             ...task,
-            date: startDateCoords,
+            date: utcDate,
             startHour,
             endHour,
           }
@@ -180,7 +202,7 @@ export default function WeekDayPage({
       container.removeEventListener('dragover', dragOver)
       container.removeEventListener('drop', drop)
     }
-  }, [tasks, currentDateState])
+  }, [tasks, currentDateState, currentTasks])
 
   return (
     <>
@@ -206,36 +228,49 @@ export default function WeekDayPage({
             <Timings hours={hours} />
           </div>
           <div className="subgrid-weekdays-container" ref={containerRef}>
-            {tasksForCurrentWeek &&
-              tasksForCurrentWeek.map(
+            {tasksWithPosition &&
+              tasksWithPosition.map(
                 (task, index) =>
                   containerRef.current && (
-                    <div
-                      key={task.id || ''}
-                      className="box"
-                      draggable={true}
-                      ref={(ref) => (boxRefs.current[index] = ref)}
-                      id={task.id}
-                      style={{
-                        top: calculateTopPosition(
-                          task.startHour,
-                          new Date(task.date).getDay(),
-                        ),
-                        left: `${
-                          ((new Date(task.date).getDay() + 6) % 7) * (100 / 7)
-                        }%`,
-                      }}
-                    >
-                      <>
-                        <div>{task.name}</div>
-                        {task.date instanceof Date && (
-                          <div>{task.date.toLocaleDateString()}</div>
-                        )}
+                    <>
+                      {/* {console.log(
+                        ((new Date(task.date).getDay() + 6) % 7) * (100 / 7),
+                      )} */}
+                      {/* //gaunama savaites diena, atsizvelgiant, kad pirma diena
+                      // yra pirmadienis, o ne sekmadienis */}
+                      <div
+                        key={task.id}
+                        className="box"
+                        draggable={true}
+                        ref={(ref) => (boxRefs.current[index] = ref)}
+                        id={task.id}
+                        // style={{
+                        //   top: calculateTopPosition(
+                        //     task.startHour,
+                        //     new Date(task.date).getDay(),
+                        //   ),
+                        //   left: `${
+                        //     ((new Date(task.date).getDay() + 6) % 7) * (100 / 7)
+                        //   }%`,
+                        // }}
+                        style={{
+                          top: task.top,
+                          left: task.left,
+                        }}
+                      >
+                        <div>
+                          {task.name.length > 10
+                            ? `${task.name.substring(0, 10).concat('...')}`
+                            : task.name}
+                        </div>
+                        <div>
+                          {task.date instanceof Date ?? task.date.toString()}
+                        </div>
                         <div>
                           {task.startHour}&nbsp;-&nbsp;{task.endHour}
                         </div>
-                      </>
-                    </div>
+                      </div>
+                    </>
                   ),
               )}
           </div>

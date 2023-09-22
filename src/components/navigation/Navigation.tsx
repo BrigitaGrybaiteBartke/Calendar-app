@@ -1,8 +1,9 @@
+import React from 'react'
 import { NavLink } from 'react-router-dom'
 import { MdOutlineArrowBackIosNew } from 'react-icons/md'
 import { MdOutlineArrowForwardIos } from 'react-icons/md'
-import { months, getLastDateOfWeek, today } from './utils/Utils'
-import './assets/Navbar.css'
+import { months, getLastDateOfWeek, today } from '../../utils/Utils'
+import './Navigation.css'
 
 interface NavigationProps {
   currentDateState: Date

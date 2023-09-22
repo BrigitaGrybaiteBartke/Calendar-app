@@ -1,16 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react'
-import SingleDay from './SingleDay'
-import Timings from './Timings'
-import { getDayName, getMonthDayNumber, hours } from './utils/Utils'
-import './assets/Timings.css'
-import './assets/SingleDayPage.css'
-import './assets/AddTaskForm.css'
-
-interface Storage {
-  set: (key: string, value: any) => void
-  get: (key: string, defaultValue?: Task[]) => Task[]
-  remove: (key: string) => void
-}
+import SingleDayPageHeader from './SingleDayPageHeader'
+import Timings from '../timings/Timings'
+import {
+  convertToUTCDateObject,
+  filterTasksForCurrentDate,
+  getDayName,
+  getMonthDayNumber,
+  hours,
+} from '../../utils/Utils'
+import '../timings/Timings.css'
+import '../dayPage/SingleDayPage.css'
 
 interface Task {
   id: string
@@ -20,12 +19,18 @@ interface Task {
   endHour: string
 }
 
+type TasksWithPosition = Task & {
+  top: number
+  left: number
+}
+
 interface SingleDayPageProps {
   currentDateState: Date
   tasks: Task[]
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>
   isToday: (dateToCheck: Date) => boolean
-  storage: Storage
+  setShowUpdateForm: React.Dispatch<React.SetStateAction<boolean>>
+  setSelectedTask: React.Dispatch<React.SetStateAction<Task | null>>
 }
 
 export default function SingleDayPage({
@@ -33,7 +38,8 @@ export default function SingleDayPage({
   tasks,
   setTasks,
   isToday,
-  storage,
+  setShowUpdateForm,
+  setSelectedTask,
 }: SingleDayPageProps) {
   const dayName = getDayName(currentDateState)
   const monthDay = getMonthDayNumber(currentDateState)
@@ -41,24 +47,39 @@ export default function SingleDayPage({
   const boxRefs = useRef<(HTMLDivElement | null)[]>([])
   const [isDragging, setIsDragging] = useState(false)
 
-  const tasksForCurrentDay = tasks.filter((task) => {
-    const newTask = new Date(task.date)
+  const url = 'http://localhost:8000/tasks'
 
-    return (
-      newTask.getDate() === currentDateState.getDate() &&
-      newTask.getMonth() === currentDateState.getMonth() &&
-      newTask.getFullYear() === currentDateState.getFullYear()
-    )
-  })
+  const copiedCurrentDateState = new Date(currentDateState.getTime())
+  const setLastTimeOfCurrentDay = copiedCurrentDateState.setHours(
+    23,
+    59,
+    59,
+    999,
+  )
+  const lastTimeOfCurrentDay = new Date(setLastTimeOfCurrentDay)
+
+  const currentTasks = filterTasksForCurrentDate(
+    tasks,
+    currentDateState,
+    lastTimeOfCurrentDay,
+  )
 
   const calculateTopPosition = (taskStartTime: string, dayIndex: number) => {
     const [hours, minutes] = taskStartTime.split(':').map(Number)
     const totalMinutes = hours * 60 + minutes
+
     const timingCellHeight = 50
     const minutesPerCell = 60
     const timingCellIndex = Math.floor(totalMinutes / minutesPerCell)
-    return `${timingCellIndex * timingCellHeight + 10}px`
+
+    return timingCellIndex * timingCellHeight + 10
   }
+
+  const tasksWithPosition: TasksWithPosition[] = currentTasks.map((task) => ({
+    ...task,
+    top: calculateTopPosition(task.startHour, new Date(task.date).getDay()),
+    left: 0,
+  }))
 
   useEffect(() => {
     if (!containerRef.current || !boxRefs.current) return
@@ -97,9 +118,8 @@ export default function SingleDayPage({
       }
     }
 
-    const drop = (e: any) => {
+    const drop = async (e: any) => {
       e.preventDefault()
-
       setIsDragging(false)
 
       const id = e.dataTransfer.getData('text/plain')
@@ -110,6 +130,7 @@ export default function SingleDayPage({
       const rect = e.target.getBoundingClientRect()
 
       const updatedY = e.clientY - rect.top
+
       const timingCellHeight = 50
       const minutesPerCell = 60
       const timingCellIndex = Math.floor(updatedY / timingCellHeight)
@@ -118,8 +139,13 @@ export default function SingleDayPage({
       const movedHours = Math.floor(movedMinutes / 60)
       const movedMinutesRemainder = movedMinutes % 60
 
+      const newTopPosition =
+        Math.floor(updatedY / timingCellHeight) * timingCellHeight
+
       const startDateCoords = new Date(currentDateState)
       startDateCoords.setHours(movedHours, movedMinutesRemainder, 0, 0)
+
+      const utcDate = convertToUTCDateObject(startDateCoords)
 
       const endDateCoords = new Date(startDateCoords)
       endDateCoords.setMinutes(startDateCoords.getMinutes() + minutesPerCell)
@@ -137,9 +163,10 @@ export default function SingleDayPage({
         if (task.id.toString() === id) {
           return {
             ...task,
-            date: startDateCoords,
+            date: utcDate,
             startHour,
             endHour,
+            top: newTopPosition,
           }
         }
         return task
@@ -147,7 +174,23 @@ export default function SingleDayPage({
 
       setTasks(updatedTasks)
 
-      storage.set('tasks', updatedTasks)
+      const updatedTask = tasks.find((task) => task.id.toString() === id)
+
+      try {
+        const response = await fetch(`${url}/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updatedTask),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to update task on the server')
+        }
+      } catch (error) {
+        console.error(error)
+      }
 
       if (draggable.className.includes('box')) {
         draggable.style.top = `${timingCellIndex * timingCellHeight + 10}px)`
@@ -185,7 +228,7 @@ export default function SingleDayPage({
         <div className="day-container">
           <div className="vertical-line vertical-line-1"></div>
           <div className="single-day">
-            <SingleDay
+            <SingleDayPageHeader
               dayName={dayName}
               monthDay={monthDay}
               isToday={isToday}
@@ -199,27 +242,30 @@ export default function SingleDayPage({
             className="subgrid-single-day-container grid-view"
             ref={containerRef}
           >
-            {tasksForCurrentDay &&
-              tasksForCurrentDay.map((task, index) => (
+            {tasksWithPosition &&
+              tasksWithPosition.map((task, index) => (
                 <div
-                  key={task.id || ''}
+                  key={task.id}
                   className="box"
                   draggable={true}
                   ref={(ref) => (boxRefs.current[index] = ref)}
                   id={task.id}
                   style={{
-                    top: calculateTopPosition(
-                      task.startHour,
-                      new Date(task.date).getDay(),
-                    ),
+                    top: task.top,
+                    left: task.left,
+                  }}
+                  onClick={() => {
+                    setSelectedTask(task)
+                    setShowUpdateForm((prev) => !prev)
                   }}
                 >
-                  {task.name.length > 90
-                    ? `${task.name.substring(0, 90).concat('...')}`
-                    : task.name}
-                  {task.date instanceof Date && (
-                    <div>{task.date.toLocaleDateString()}</div>
-                  )}
+                  <div>
+                    {task.name.length > 90
+                      ? `${task.name.substring(0, 90).concat('...')}`
+                      : task.name}
+                  </div>
+
+                  <div>{task.date.toString()}</div>
                   <div>
                     {task.startHour}&nbsp;-&nbsp;{task.endHour}
                   </div>

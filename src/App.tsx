@@ -1,16 +1,21 @@
 import { useEffect, useState } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import {
+  convertToUTCDateObject,
   getNextWeek,
   getPreviousWeek,
+  getviewType,
   today,
   useCurrentDateState,
-} from './components/utils/Utils'
-import Navigation from './components/Navigation'
+} from './utils/Utils'
+import Navigation from './components/navigation/Navigation'
 import './App.css'
-import SingleDayPage from './components/SingleDayPage'
-import AddTaskForm from './components/AddTaskForm'
-import WeekDayPage from './components/WeekDayPage'
+import SingleDayPage from './components/dayPage/SingleDayPage'
+import AddTaskForm from './components/taskAddForm/TaskAddForm'
+import WeekDayPage from './components/weekPage/WeekDayPage'
+import './components/taskAddForm/TaskAddForm.css'
+import './components/taskUpdateForm/TaskUpdateForm.css'
+import TaskUpdateForm from './components/taskUpdateForm/TaskUpdateForm'
 
 interface Task {
   id: string
@@ -23,64 +28,104 @@ interface Task {
 export default function App() {
   const { currentDateState, setCurrentDateState } = useCurrentDateState()
   const [tasks, setTasks] = useState<Task[]>([])
+  const [viewType, setViewType] = useState(getviewType())
 
-  const storage = {
-    set: (key: string, value: any) => {
-      localStorage.setItem(key, JSON.stringify(value))
-    },
-    get: (key: string, defaultValue?: Task[]): Task[] => {
-      const value = localStorage.getItem(key)
-      return value ? JSON.parse(value) : defaultValue
-    },
-    remove: (key: string) => {
-      localStorage.removeItem(key)
-    },
-  }
+  const [showUpdateForm, setShowUpdateForm] = useState(false)
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+
+  const url = 'http://localhost:8000/tasks'
 
   useEffect(() => {
-    const localStorageTasks = storage.get('tasks', [])
-    setTasks(localStorageTasks)
-  }, [])
+    async function fetchData() {
+      try {
+        const response = await fetch(url)
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch data')
+        }
+
+        const data = await response.json()
+
+        console.log(data)
+        const tasksWithLocalTime = data.map((task: Task) => {
+          const utcTimeStamp = task.date
+
+          const date = new Date(utcTimeStamp)
+
+          const localTime = date.toString()
+
+          return {
+            ...task,
+            date: localTime,
+          }
+        })
+
+        setTasks(tasksWithLocalTime)
+      } catch (error) {
+        console.error('Error:', error)
+      }
+    }
+
+    fetchData()
+  }, [viewType])
+
+  const handleDeleteTask = async (taskId: string) => {
+    try {
+      const response = await fetch(`${url}/${taskId}`, {
+        method: 'DELETE',
+      })
+      const filteredTasks = tasks.filter((task) => task.id !== taskId)
+      setTasks(filteredTasks)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const handleUpdateTask = async (updatedTask: Task) => {
+    try {
+      const response = await fetch(`${url}/${updatedTask.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedTask),
+      })
+      if (!response.ok) {
+        throw new Error('Failed to update task on the server')
+      }
+
+      const updatedTasks = tasks.map((task) => {
+        return task.id === updatedTask.id ? updatedTask : task
+      })
+
+      setTasks(updatedTasks)
+      setSelectedTask(updatedTask)
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   const handleAddTask = (newTask: Task, selectedDate: Date) => {
     const timeString = newTask.startHour
 
     const [hours, minutes] = timeString.split(':')
-
     const parsedHours = parseInt(hours)
     const parsedMinutes = parseInt(minutes)
 
     const newSelectedDate = new Date(selectedDate)
     newSelectedDate.setHours(parsedHours, parsedMinutes, 0, 0)
 
-    const utcDate = new Date(
-      newSelectedDate.getTime() - newSelectedDate.getTimezoneOffset() * 60000,
-    )
+    const utcDate = convertToUTCDateObject(newSelectedDate)
 
     const updatedTask = {
       ...newTask,
       date: utcDate,
     }
 
-    setTasks((prevTasks) => [...prevTasks, updatedTask])
     setCurrentDateState(new Date(selectedDate))
 
-    storage.set('tasks', [...tasks, updatedTask])
+    setTasks((prevTasks) => [...prevTasks, updatedTask])
   }
-
-  const getviewType = () => {
-    const currentPath = window.location.pathname
-    if (currentPath === '/day') {
-      return 'day'
-    } else if (currentPath === '/week') {
-      return 'week'
-    } else if (currentPath === '/month') {
-      return 'month'
-    }
-    return 'day'
-  }
-
-  const [viewType, setViewType] = useState(getviewType())
 
   const handleViewTypeChange = (viewType: string) => {
     if (viewType) {
@@ -130,10 +175,21 @@ export default function App() {
           viewType={viewType}
           handleViewTypeChange={handleViewTypeChange}
         />
-        <AddTaskForm
-          handleAddTask={handleAddTask}
-          currentDateState={currentDateState}
+        <TaskUpdateForm
+          showUpdateForm={showUpdateForm}
+          onRequestClose={() => {
+            setShowUpdateForm((prev) => !prev)
+          }}
+          selectedTask={selectedTask}
+          onDelete={handleDeleteTask}
+          onUpdate={handleUpdateTask}
         />
+        <div className="side-grid">
+          <AddTaskForm
+            onAddTask={handleAddTask}
+            currentDateState={currentDateState}
+          />
+        </div>
         <Routes>
           <Route path="/" element={<Navigate to="/day" />} />
           <Route
@@ -144,7 +200,8 @@ export default function App() {
                 tasks={tasks}
                 setTasks={setTasks}
                 isToday={isToday}
-                storage={storage}
+                setShowUpdateForm={setShowUpdateForm}
+                setSelectedTask={setSelectedTask}
               />
             }
           />
@@ -156,7 +213,6 @@ export default function App() {
                 tasks={tasks}
                 setTasks={setTasks}
                 isToday={isToday}
-                storage={storage}
               />
             }
           />

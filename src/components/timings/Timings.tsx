@@ -1,8 +1,8 @@
-interface TimingProps {
+interface TimingsProps {
   hours: number[]
 }
 
-export default function Timings({ hours }: TimingProps) {
+export default function Timings({ hours }: TimingsProps) {
   return (
     <>
       <div className="timings">
