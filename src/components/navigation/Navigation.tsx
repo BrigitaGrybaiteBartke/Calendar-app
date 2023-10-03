@@ -53,7 +53,7 @@ export default function Navigation({
         </div>
         <div className="navbar-today">
           <button className="today-btn" onClick={handleTodayClick}>
-            Today
+            today
           </button>
         </div>
         <div className="navbar-date-bar">

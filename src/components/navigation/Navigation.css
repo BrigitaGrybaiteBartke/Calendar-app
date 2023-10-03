@@ -1,89 +1,124 @@
-.top-grid {
-  grid-column: 1 / -1;
-}
-
 .navbar {
   display: flex;
   align-items: center;
   border-bottom: 1px solid grey;
 }
 
-.navbar .navbar-today {
-  margin-left: auto;
-  width: 40%;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.navbar .navbar-today .button-today {
-  text-transform: uppercase;
-  font-size: 12px;
-  background-color: transparent;
-  padding: 8px 14px;
-  border-radius: 5px;
-  border: 1px solid grey;
-}
-
-.navbar .navbar-today .button-today:hover {
-  color: rgb(113, 113, 116);
-}
-
-.navbar .navbar-date-bar {
-  font-size: 18px;
-  margin-left: auto;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  min-width: 35%;
-}
-
-.navbar .navbar-date-bar .button-backward,
-.navbar .navbar-date-bar .button-forward {
-  border: none;
-  background: transparent;
-  padding: 10px;
-  font-size: 14px;
-  margin: 0 2px 0;
+.navbar .navbar-header {
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 20%;
+}
+
+.navbar .navbar-header .header-calc {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+  padding-right: 10px;
+  text-transform: uppercase;
+}
+
+.navbar .navbar-header .header-today {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid grey;
+  border-radius: 50px;
+  width: 40px;
+  height: 40px;
+}
+
+.navbar .navbar-today {
+  display: flex;
+  justify-content: flex-end;
+  margin-left: auto;
+  width: 25%;
+}
+
+.navbar .navbar-today .today-btn {
+  text-transform: uppercase;
+  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 5px;
+  border: 1px solid grey;
+  background: transparent;
+  transition: var(--transition);
+}
+
+.navbar .navbar-today .today-btn:hover {
+  box-shadow: var(--shadow-hover);
+  color: var(--second-text-color);
+}
+
+.navbar .navbar-date-bar {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  font-size: 18px;
+  margin-left: auto;
+}
+
+.navbar .navbar-date-bar .backward-btn,
+.navbar .navbar-date-bar .forward-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 0 2px 0;
+  font-size: 14px;
+  background: transparent;
+  transition: var(--transition);
+}
+
+.navbar .navbar-date-bar .backward-btn:hover,
+.navbar .navbar-date-bar .forward-btn:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+.navbar .navbar-date-bar .backward-btn:hover svg,
+.navbar .navbar-date-bar .forward-btn:hover svg {
+  fill: var(--second-text-color);
 }
 
 .navbar .navbar-date-bar .navbar-date {
   margin-left: 20px;
   text-align: left;
-  background-color: ;
 }
 
-.navbar .navbar-links {
+.navbar .navbar-menu {
   margin-left: auto;
 }
 
-.navbar .navbar-links .menu {
+.navbar .navbar-menu .links {
   display: flex;
   justify-content: flex-end;
   align-items: center;
 }
 
-.navbar .navbar-links .menu li {
+.navbar .navbar-menu .links li {
   list-style: none;
   padding: 20px 14px;
 }
 
-.navbar .navbar-links .menu .menu-link {
+.navbar .navbar-menu .links .link {
   text-decoration: none;
   font-size: 12px;
-  color: rgb(0, 0, 0);
   text-transform: uppercase;
   padding: 8px 14px;
+  transition: var(--transition);
 }
 
-.navbar .navbar-links .menu .menu-link:hover {
-  color: rgb(113, 113, 116);
-}
-
-.navbar .navbar-links .menu li .active {
-  border: 1px solid grey;
+.navbar .navbar-menu .links .link:hover {
   border-radius: 5px;
-  padding: 5px 10px 5px;
+  box-shadow: var(--shadow-hover);
+  color: var(--second-text-color);
+}
+
+.navbar .navbar-menu .links li .active {
+  border-radius: 5px;
+  border: 1px solid grey;
 }

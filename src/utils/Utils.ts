@@ -54,7 +54,7 @@ export const calculateTopPosition = (taskStartTime: string) => {
     const minutesPerCell = 60
     const timingCellIndex = Math.floor(totalMinutes / minutesPerCell)
 
-    return timingCellIndex * timingCellHeight + 10
+    return timingCellIndex * timingCellHeight + 29
   }
 }
 
@@ -138,13 +138,6 @@ export const getviewType = () => {
   }
   return 'day'
 }
-
-// export const convertToUTCDateObject = (date: Date) => {
-//   const utcTimeISO = date.toISOString()
-//   // const utcDate = new Date(utcTimeISO)
-//   // return utcDate
-//   return utcTimeISO
-// }
 
 export const filterTasksForCurrentDay = (tasks: Task[], currentDate: Date) => {
   const currentDateStart = new Date(currentDate)

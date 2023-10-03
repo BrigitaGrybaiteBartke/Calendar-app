@@ -47,7 +47,7 @@ export const deleteDataRequest = async (url: string, taskId: string) => {
   }
 }
 
-export async function postDataRequest(url: string, newData: Task) {
+export const postDataRequest = async (url: string, newData: Task) => {
   try {
     const utcDate = newData.date.toISOString()
 

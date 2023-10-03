@@ -1,7 +1,27 @@
+:root {
+  --main-text-color: rgb(60, 64, 67);
+  --second-text-color: rgb(123, 128, 132);
+  --modal-bg-color: rgba(0, 0, 0, 0.265);
+  --modal-content-bg-color: #ffffffa6;
+  --main-btn-color: rgb(229, 230, 232);
+  --btn-text-color: rgb(60, 64, 67);
+  --btn-hover-text-color: white;
+  --update-btn-color: rgb(50, 73, 238);
+  --cancel-btn-color: rgb(103, 102, 102);
+  --delete-btn-color: rgb(238, 54, 50);
+  --add-btn-color: rgb(54, 172, 14);
+  --bg-color: rgb(204, 224, 251);
+  --svg-color: rgb(60, 64, 67);
+  --line-color: rgb(222, 222, 225);
+  --shadow-hover: 2px 2px 6px 1px grey;
+  --transition: all 0.25s ease;
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  color: var(--main-text-color);
 }
 
 body {
@@ -10,8 +30,17 @@ body {
 
 #root {
   display: grid;
-  grid-template-columns: 300px auto;
+  grid-template-columns: 200px auto;
   grid-template-rows: 90px auto;
+}
+
+.top-grid {
+  grid-column: 1 / -1;
+}
+
+.content-grid {
+  grid-column: 2 / -1;
+  grid-row: auto;
 }
 
 .side-grid {
@@ -24,4 +53,45 @@ body {
 .flex {
   display: flex;
   flex-direction: column;
+}
+
+.side-grid .side-add-btn {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 14px;
+  margin: auto;
+  width: 50%;
+  height: 50%;
+  cursor: pointer;
+  background: var(--main-btn-color);
+  transition: var(--transition);
+}
+
+.side-grid .side-add-btn .side-btn-text {
+  text-transform: uppercase;
+  padding-left: 5px;
+  font-size: 10px;
+  color: var(--btn-text-color);
+}
+
+.side-grid .side-add-btn svg {
+  fill: var(--svg-color);
+  font-size: 12px;
+}
+
+.side-grid .side-add-btn:hover {
+  background: var(--add-btn-color);
+  box-shadow: var(--shadow-hover);
+}
+
+.side-grid .side-add-btn:hover svg {
+  fill: var(--btn-hover-text-color);
+}
+
+.side-grid .side-add-btn:hover .side-btn-text {
+  color: var(--btn-hover-text-color);
 }

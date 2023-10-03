@@ -26,19 +26,11 @@ import {
   putDataRequest,
   url,
 } from './utils/Api'
-
 import './assets/Form.css'
 import './assets/TaskBox.css'
-
+import './assets/DividingLines.css'
+import { Task } from './utils/Types'
 import { TfiPlus } from 'react-icons/tfi'
-
-interface Task {
-  id: string
-  name: string
-  date: Date
-  startHour: string
-  endHour: string
-}
 
 export default function App() {
   const { currentDateState, setCurrentDateState } = useCurrentDateState()
@@ -63,8 +55,6 @@ export default function App() {
     const fetchDataAsync = async () => {
       const response = await fetchDataRequest(url)
 
-      // console.log(response)
-
       if (response instanceof Error) {
         console.log(response.message)
       }
@@ -84,14 +74,11 @@ export default function App() {
     }
 
     const filteredTasks = tasks.filter((task) => task.id !== taskId)
-
     setTasks(filteredTasks)
   }
 
   const handleAddTask = async (newTask: Task, selectedDate: Date) => {
     const response = await postDataRequest(url, newTask)
-
-    console.log(response)
 
     if (response instanceof Error) {
       console.log(response.message)
@@ -103,14 +90,11 @@ export default function App() {
     }
 
     setCurrentDateState(() => selectedDate)
-
     setTasks((prev) => [...prev, taskWithLocalTime])
   }
 
   const handleUpdateTask = async (updatedTask: Task, updatedDate: Date) => {
     const response = await putDataRequest(url, updatedTask)
-
-    console.log(response)
 
     if (response instanceof Error) {
       console.log(response.message)
@@ -120,8 +104,6 @@ export default function App() {
       ...response,
       date: new Date(response.date),
     }
-
-    console.log(taskWithLocalTime)
 
     const updatedTasks = tasks.map((task) => {
       return task.id === taskWithLocalTime.id ? taskWithLocalTime : task

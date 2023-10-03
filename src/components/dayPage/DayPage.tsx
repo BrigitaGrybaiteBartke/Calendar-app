@@ -160,7 +160,7 @@ export default function DayPage({
       }
 
       if (draggable.className.includes('box')) {
-        draggable.style.top = `${timingCellIndex * timingCellHeight + 10}px)`
+        draggable.style.top = `${timingCellIndex * timingCellHeight + 29}px)`
         draggable.classList.remove('hide')
         e.target.appendChild(draggable)
       }
@@ -203,10 +203,7 @@ export default function DayPage({
         <div className="timing-container">
           <Timings hours={hours} />
         </div>
-        <div
-          className="subgrid-single-day-container grid-view"
-          ref={containerRef}
-        >
+        <div className="subgrid-single-day-container" ref={containerRef}>
           {tasksWithPosition &&
             tasksWithPosition.map((task, index) => (
               <div

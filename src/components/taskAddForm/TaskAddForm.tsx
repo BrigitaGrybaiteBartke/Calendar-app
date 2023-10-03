@@ -103,7 +103,7 @@ export default function TaskAddForm({
                 placeholder="Enter task..."
                 onChange={handleInputChange}
                 value={taskDetails.name}
-                // required
+                required
               />
             </div>
 
@@ -113,8 +113,7 @@ export default function TaskAddForm({
                 type="date"
                 name="date"
                 onChange={handleInputChange}
-
-                // required
+                required
               />
             </div>
             <div className="input-container">
@@ -126,7 +125,7 @@ export default function TaskAddForm({
                   handleInputChange(e)
                 }}
                 value={taskDetails.startHour}
-                // required
+                required
               />
             </div>
             <div className="input-container">
@@ -136,7 +135,7 @@ export default function TaskAddForm({
                 name="endHour"
                 onChange={handleInputChange}
                 value={taskDetails.endHour}
-                //   required
+                required
               />
             </div>
             <div className="action-btn">

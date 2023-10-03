@@ -1,59 +1,42 @@
-.form-update {
-  grid-row: 3 / 4;
-
+.action-btn .update-btn,
+.action-btn .cancel-btn,
+.action-btn .delete-btn {
   display: flex;
-  flex-direction: column;
-  justify-content: start;
-  align-items: stretch;
-  padding: 10px;
-  margin: 10px;
-  border: 0.5px solid rgb(174, 173, 173);
-  border-radius: 5px;
-}
-
-.input-container {
-  display: flex;
-  justify-content: start;
+  flex-direction: row;
   align-items: center;
-  padding: 10px;
-  position: relative;
-}
-
-.input-container label {
-  font-size: 12px;
-  width: 30%;
-}
-
-input {
-  width: 100%;
-  font-size: 11px;
-  border: none;
-  border-bottom: 0.5px solid grey;
-  border-radius: 5px;
-  padding: 10px 20px;
-  outline: none;
-}
-
-input[type="date"],
-input[type="time"] {
-  width: 55%;
-}
-
-input:focus {
-  border-bottom: 1px solid grey;
-  border-radius: 5px;
-}
-
-.submit-button {
   border: none;
   border-radius: 5px;
   padding: 8px 14px;
-  background-color: #4caf50;
-  color: white;
-  cursor: pointer;
   margin-top: 10px;
+  margin-right: 10px;
+  cursor: pointer;
+  background: var(--main-btn-color);
+  transition: var(--transition);
 }
 
-.submit-button:hover {
-  background-color: #45a049;
+.action-btn .update-btn:hover {
+  background: var(--update-btn-color);
+  box-shadow: var(--shadow-hover);
+}
+
+.action-btn .cancel-btn:hover {
+  background-color: var(--cancel-btn-color);
+  box-shadow: var(--shadow-hover);
+}
+
+.action-btn .delete-btn:hover {
+  background-color: var(--delete-btn-color);
+  box-shadow: var(--shadow-hover);
+}
+
+.action-btn .update-btn:hover svg,
+.action-btn .cancel-btn:hover svg,
+.action-btn .delete-btn:hover svg {
+  fill: var(--btn-hover-text-color);
+}
+
+.action-btn .update-btn:hover .btn-text,
+.action-btn .cancel-btn:hover .btn-text,
+.action-btn .delete-btn:hover .btn-text {
+  color: var(--btn-hover-text-color);
 }

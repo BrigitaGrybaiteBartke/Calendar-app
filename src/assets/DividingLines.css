@@ -1,0 +1,29 @@
+.timing-container .horizontal-line::before {
+  content: "";
+  position: absolute;
+  left: 50px;
+  width: 95%;
+  height: 1px;
+  background: var(--line-color);
+  z-index: 100;
+}
+
+.week-container .weekdays [class^="vertical-line-"]::before {
+  content: "";
+  position: absolute;
+  top: 75px;
+  bottom: 0;
+  width: 1px;
+  background: var(--line-color);
+  z-index: 100;
+}
+
+.day-container .single-day .vertical-line::before {
+  content: "";
+  position: absolute;
+  top: 75px;
+  bottom: 0;
+  width: 1px;
+  background: var(--line-color);
+  z-index: 100;
+}

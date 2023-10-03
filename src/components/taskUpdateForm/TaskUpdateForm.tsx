@@ -86,10 +86,7 @@ export default function TaskUpdateForm({
         endHour: updatedTaskDetails.endHour,
       }
 
-      console.log(updatedTask)
-
       onUpdate(updatedTask, newUpdatedDate)
-
       onRequestClose()
     }
   }
@@ -112,7 +109,6 @@ export default function TaskUpdateForm({
           >
             <TfiClose />
           </button>
-
           <form onSubmit={handleUpdate} className="form">
             <div className="input-container">
               <input
@@ -121,17 +117,16 @@ export default function TaskUpdateForm({
                 placeholder="Edit task..."
                 onChange={handleInputChange}
                 value={updatedTaskDetails.name}
-                // required
+                required
               />
             </div>
-
             <div className="input-container">
               <label>Start Date:</label>
               <input
                 type="date"
                 name="date"
                 onChange={handleInputChange}
-                // required
+                required
               />
             </div>
             <div className="input-container">
@@ -141,7 +136,7 @@ export default function TaskUpdateForm({
                 name="startHour"
                 onChange={handleInputChange}
                 value={updatedTaskDetails.startHour}
-                // required
+                required
               />
             </div>
             <div className="input-container">
@@ -151,7 +146,7 @@ export default function TaskUpdateForm({
                 name="endHour"
                 onChange={handleInputChange}
                 value={updatedTaskDetails.endHour}
-                //   required
+                required
               />
             </div>
             <div className="action-btn">
@@ -159,7 +154,6 @@ export default function TaskUpdateForm({
                 <TfiCheck />
                 <span className="btn-text">update</span>
               </button>
-
               <button
                 type="button"
                 className="cancel-btn"

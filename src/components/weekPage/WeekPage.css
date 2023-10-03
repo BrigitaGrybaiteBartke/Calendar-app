@@ -11,17 +11,6 @@
   grid-row: 1 / 2;
 }
 
-
-[class^="vertical-line-"]::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background-color: var(--line-color);
-  z-index: 100;
-}
-
 .week-container .subgrid-weekdays-container {
   grid-column: 2 / -1;
   grid-row: 2 / -1;

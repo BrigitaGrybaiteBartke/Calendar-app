@@ -35,7 +35,6 @@ export default function WeekPage({
   const tasksWithPosition: TasksWithPosition[] = currentWeekTasks.map(
     (task) => {
       const top = calculateTopPosition(task.startHour)
-
       const left = calculateLeftPosition(new Date(task.date))
 
       if (typeof top === 'number' && typeof left === 'number') {

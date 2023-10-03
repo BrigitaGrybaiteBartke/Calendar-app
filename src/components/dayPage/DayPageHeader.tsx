@@ -9,8 +9,7 @@ export default function DayPageHeader({
 }: DayPageHeaderProps) {
   return (
     <>
-      <div className={`vertical-line-1`} />
-
+      <div className="vertical-line" />
       <div className="day">
         <span className="day-name">{dayName}</span>
         <span className={`month-day ${isToday(currentDateState) && 'today'}`}>

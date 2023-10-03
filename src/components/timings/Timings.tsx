@@ -6,7 +6,7 @@ export default function Timings({ hours }: TimingsProps) {
       <div className="timings">
         {hours.map((hour: number, hourIndex: number) => (
           <div key={hourIndex} className="timeline">
-            <div className="horizontal-line" />
+            <div className={`horizontal-line`} />
             <span className="time">{hour.toString().padStart(2, '0')}:00</span>
           </div>
         ))}
