@@ -122,12 +122,7 @@ export default function TaskUpdateForm({
             </div>
             <div className="input-container">
               <label>Start Date:</label>
-              <input
-                type="date"
-                name="date"
-                onChange={handleInputChange}
-                required
-              />
+              <input type="date" name="date" onChange={handleInputChange} />
             </div>
             <div className="input-container">
               <label>Start Hour:</label>
