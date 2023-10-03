@@ -1,26 +1,14 @@
 import { useEffect, useState } from 'react'
-import '../Modal.css'
-
-interface Task {
-  id: string
-  name: string
-  date: Date
-  startHour: string
-  endHour: string
-}
-
-interface TaskUpdateFormProps {
-  showUpdateForm: boolean
-  onRequestClose: () => void
-  selectedTask: Task | null
-  onDelete: (taskId: string) => void
-  onUpdate: (updatedTask: Task) => void
-}
+import { Task, TaskUpdateFormProps } from '../../utils/Types'
+import '../taskUpdateForm/TaskUpdateForm.css'
+import { TfiTrash } from 'react-icons/tfi'
+import { TfiClose } from 'react-icons/tfi'
+import { TfiCheck } from 'react-icons/tfi'
 
 export default function TaskUpdateForm({
+  selectedTask,
   showUpdateForm,
   onRequestClose,
-  selectedTask,
   onDelete,
   onUpdate,
 }: TaskUpdateFormProps) {
@@ -52,11 +40,13 @@ export default function TaskUpdateForm({
     const { name, value } = e.target
 
     if (name === 'date') {
-      const newSelectedDate = new Date(value)
-      newSelectedDate.setHours(0, 0, 0, 0)
+      const inputSelectedDate = new Date(value)
+
+      inputSelectedDate.setHours(0, 0, 0, 0)
+
       setUpdatedTaskDetails((prev) => ({
         ...prev,
-        date: newSelectedDate,
+        date: inputSelectedDate,
       }))
     } else {
       setUpdatedTaskDetails((prev) => ({
@@ -79,6 +69,7 @@ export default function TaskUpdateForm({
     }
 
     const newUpdatedDate = new Date(updatedTaskDetails.date)
+
     const timeString = updatedTaskDetails.startHour
     const [hours, minutes] = timeString.split(':')
     const parsedHours = parseInt(hours)
@@ -88,17 +79,19 @@ export default function TaskUpdateForm({
 
     if (selectedTask && updatedTaskDetails) {
       const updatedTask = {
-        ...selectedTask,
+        id: selectedTask.id,
         name: updatedTaskDetails.name,
         date: newUpdatedDate,
         startHour: updatedTaskDetails.startHour,
         endHour: updatedTaskDetails.endHour,
       }
 
-      onUpdate(updatedTask)
-      selectedTask && onUpdate(updatedTaskDetails)
+      console.log(updatedTask)
+
+      onUpdate(updatedTask, newUpdatedDate)
+
+      onRequestClose()
     }
-    onRequestClose()
   }
 
   const handleDelete = (e: React.MouseEvent<HTMLElement>) => {
@@ -117,10 +110,10 @@ export default function TaskUpdateForm({
               onRequestClose()
             }}
           >
-            x
+            <TfiClose />
           </button>
 
-          <form onSubmit={handleUpdate} className="form-update">
+          <form onSubmit={handleUpdate} className="form">
             <div className="input-container">
               <input
                 type="text"
@@ -161,27 +154,32 @@ export default function TaskUpdateForm({
                 //   required
               />
             </div>
-            <button
-              type="submit"
-              className="submit-button"
-              // onClick={handleUpdate}
-            >
-              update
-            </button>
+            <div className="action-btn">
+              <button type="submit" className="update-btn">
+                <TfiCheck />
+                <span className="btn-text">update</span>
+              </button>
 
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault()
-                onRequestClose()
-                console.log('cancel')
-              }}
-            >
-              cancel
-            </button>
-            <button type="button" onClick={handleDelete}>
-              delete
-            </button>
+              <button
+                type="button"
+                className="cancel-btn"
+                onClick={(e) => {
+                  e.preventDefault()
+                  onRequestClose()
+                }}
+              >
+                <TfiClose />
+                <span className="btn-text">cancel</span>
+              </button>
+              <button
+                type="button"
+                className="delete-btn"
+                onClick={handleDelete}
+              >
+                <TfiTrash />
+                <span className="btn-text">delete</span>
+              </button>
+            </div>
           </form>
         </div>
       </div>

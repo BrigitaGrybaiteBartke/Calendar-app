@@ -1,20 +1,16 @@
-import './SingleDayPageHeader.css'
+import { DayPageHeaderProps } from '../../utils/Types'
+import './DayPageHeader.css'
 
-interface SingleDayPageHeaderProps {
-  dayName: string
-  monthDay: number
-  isToday: (dateToCheck: Date) => boolean
-  currentDateState: Date
-}
-
-export default function SingleDayPageHeader({
+export default function DayPageHeader({
   dayName,
   monthDay,
   isToday,
   currentDateState,
-}: SingleDayPageHeaderProps) {
+}: DayPageHeaderProps) {
   return (
     <>
+      <div className={`vertical-line-1`} />
+
       <div className="day">
         <span className="day-name">{dayName}</span>
         <span className={`month-day ${isToday(currentDateState) && 'today'}`}>

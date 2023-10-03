@@ -1,21 +1,14 @@
 import React, { useState } from 'react'
-
-interface Task {
-  id: string
-  name: string
-  date: Date
-  startHour: string
-  endHour: string
-}
-
-interface TaskAddFormProps {
-  onAddTask?: (newTask: Task, selectedDate: Date) => void
-  currentDateState: Date
-}
+import { TaskAddFormProps } from '../../utils/Types'
+import '../taskAddForm/TaskAddForm.css'
+import { TfiClose } from 'react-icons/tfi'
+import { TfiCheck } from 'react-icons/tfi'
 
 export default function TaskAddForm({
-  onAddTask,
   currentDateState,
+  onAddTask,
+  showAddForm,
+  onRequestClose,
 }: TaskAddFormProps) {
   const [selectedDate, setSelectedDate] = useState<Date>(currentDateState)
 
@@ -26,22 +19,20 @@ export default function TaskAddForm({
     endHour: '',
   })
 
-  const url = 'http://localhost:8000/tasks'
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault()
 
     const { name, value } = e.target
 
     if (name === 'date') {
-      const newSelectedDate = new Date(value)
-      newSelectedDate.setHours(0, 0, 0, 0)
+      const inputSelectedDate = new Date(value)
 
-      setSelectedDate(newSelectedDate)
+      inputSelectedDate.setHours(0, 0, 0, 0)
+      setSelectedDate(inputSelectedDate)
 
       setTaskDetails((prev) => ({
         ...prev,
-        [name]: new Date(value),
+        [name]: selectedDate,
       }))
     } else {
       setTaskDetails((prev) => ({
@@ -63,104 +54,100 @@ export default function TaskAddForm({
       return
     }
 
-    const newSelectedDate = new Date(selectedDate)
-
     const timeString = taskDetails.startHour
     const [hours, minutes] = timeString.split(':')
     const parsedHours = parseInt(hours)
     const parsedMinutes = parseInt(minutes)
 
+    const newSelectedDate = new Date(selectedDate)
     newSelectedDate.setHours(parsedHours, parsedMinutes, 0, 0)
 
-    const taskData = {
-      id: Date.now().toString(),
-      name: taskDetails.name,
-      date: newSelectedDate.toISOString(),
-      startHour: taskDetails.startHour,
-      endHour: taskDetails.endHour,
-    }
-
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(taskData),
-      })
-
-      if (onAddTask) {
-        const newTask = {
-          id: Date.now().toString(),
-          name: taskDetails.name,
-          date: newSelectedDate,
-          startHour: taskDetails.startHour,
-          endHour: taskDetails.endHour,
-        }
-
-        onAddTask(newTask, newSelectedDate)
+    if (onAddTask) {
+      const newTask = {
+        id: Date.now().toString(),
+        name: taskDetails.name,
+        date: newSelectedDate,
+        startHour: taskDetails.startHour,
+        endHour: taskDetails.endHour,
       }
 
-      setTaskDetails({
-        name: '',
-        date: selectedDate,
-        startHour: '',
-        endHour: '',
-      })
-    } catch (error) {
-      console.error(error)
+      onAddTask(newTask, newSelectedDate)
+      onRequestClose()
     }
+
+    setTaskDetails({
+      name: '',
+      date: selectedDate,
+      startHour: '',
+      endHour: '',
+    })
   }
 
-  return (
+  return showAddForm ? (
     <>
-      <form onSubmit={handleSubmit} className="form-add">
-        <div className="input-container">
-          <input
-            type="text"
-            name="name"
-            placeholder="Enter task..."
-            onChange={handleInputChange}
-            value={taskDetails.name}
-            // required
-          />
-        </div>
-
-        <div className="input-container">
-          <label>Start Date:</label>
-          <input
-            type="date"
-            name="date"
-            onChange={handleInputChange}
-            // required
-          />
-        </div>
-        <div className="input-container">
-          <label>Start Hour:</label>
-          <input
-            type="time"
-            name="startHour"
-            onChange={(e) => {
-              handleInputChange(e)
+      <div className="modal">
+        <div className="modal-content">
+          <button
+            className="close-btn"
+            onClick={() => {
+              onRequestClose()
             }}
-            value={taskDetails.startHour}
-            // required
-          />
+          >
+            <TfiClose />
+          </button>
+          <form onSubmit={handleSubmit} className="form">
+            <div className="input-container">
+              <input
+                type="text"
+                name="name"
+                placeholder="Enter task..."
+                onChange={handleInputChange}
+                value={taskDetails.name}
+                // required
+              />
+            </div>
+
+            <div className="input-container">
+              <label>Start Date:</label>
+              <input
+                type="date"
+                name="date"
+                onChange={handleInputChange}
+
+                // required
+              />
+            </div>
+            <div className="input-container">
+              <label>Start Hour:</label>
+              <input
+                type="time"
+                name="startHour"
+                onChange={(e) => {
+                  handleInputChange(e)
+                }}
+                value={taskDetails.startHour}
+                // required
+              />
+            </div>
+            <div className="input-container">
+              <label>End Hour:</label>
+              <input
+                type="time"
+                name="endHour"
+                onChange={handleInputChange}
+                value={taskDetails.endHour}
+                //   required
+              />
+            </div>
+            <div className="action-btn">
+              <button type="submit" className="add-btn">
+                <TfiCheck />
+                <span className="btn-text">add</span>
+              </button>
+            </div>
+          </form>
         </div>
-        <div className="input-container">
-          <label>End Hour:</label>
-          <input
-            type="time"
-            name="endHour"
-            onChange={handleInputChange}
-            value={taskDetails.endHour}
-            //   required
-          />
-        </div>
-        <button type="submit" className="submit-button">
-          Add
-        </button>
-      </form>
+      </div>
     </>
-  )
+  ) : null
 }

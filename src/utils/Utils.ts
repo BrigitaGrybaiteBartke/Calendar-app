@@ -45,6 +45,27 @@ export const months = [
   'December',
 ]
 
+export const calculateTopPosition = (taskStartTime: string) => {
+  if (taskStartTime) {
+    const [hours, minutes] = taskStartTime.split(':').map(Number)
+    const totalMinutes = hours * 60 + minutes
+
+    const timingCellHeight = 50
+    const minutesPerCell = 60
+    const timingCellIndex = Math.floor(totalMinutes / minutesPerCell)
+
+    return timingCellIndex * timingCellHeight + 10
+  }
+}
+
+export const calculateLeftPosition = (taskDate: Date) => {
+  const dayIndex = (taskDate.getDay() + 6) % 7
+
+  const cellWidth = 100 / 7
+  const leftCoords = dayIndex * cellWidth
+  return leftCoords
+}
+
 export const today: Date = new Date()
 
 export const todayNumber: number = today.getDay()
@@ -118,13 +139,27 @@ export const getviewType = () => {
   return 'day'
 }
 
-export const convertToUTCDateObject = (date: Date) => {
-  const utcTimeISO = date.toISOString()
-  const utcDate = new Date(utcTimeISO)
-  return utcDate
+// export const convertToUTCDateObject = (date: Date) => {
+//   const utcTimeISO = date.toISOString()
+//   // const utcDate = new Date(utcTimeISO)
+//   // return utcDate
+//   return utcTimeISO
+// }
+
+export const filterTasksForCurrentDay = (tasks: Task[], currentDate: Date) => {
+  const currentDateStart = new Date(currentDate)
+  currentDateStart.setHours(0, 0, 0, 0)
+
+  const currentDateEnd = new Date(currentDate)
+  currentDateEnd.setHours(23, 59, 59, 999)
+
+  return tasks.filter((task) => {
+    const taskDate = new Date(task.date)
+    return taskDate >= currentDateStart && taskDate <= currentDateEnd
+  })
 }
 
-export const filterTasksForCurrentDate = (
+export const filterTasksForCurrentWeek = (
   tasks: Task[],
   startDate: Date,
   endDate: Date,
@@ -133,29 +168,4 @@ export const filterTasksForCurrentDate = (
     const taskDate = new Date(task.date)
     return taskDate >= startDate && taskDate <= endDate
   })
-}
-
-export const storage = {
-  set: (key: string, value: any) => {
-    localStorage.setItem(
-      key,
-      JSON.stringify(
-        value.map((task: Task) => ({
-          ...task,
-          date: task.date.toISOString(),
-        })),
-      ),
-    )
-  },
-  get: (key: string, defaultValue: Task[] = []) => {
-    const tasks = JSON.parse(localStorage.getItem(key) || '[]')
-
-    return tasks.map((task: Task) => ({
-      ...task,
-      date: new Date(task.date),
-    }))
-  },
-  remove: (key: string) => {
-    localStorage.removeItem(key)
-  },
 }

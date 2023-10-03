@@ -8,7 +8,7 @@
 }
 
 .single-day .day .day-name {
-  color: grey;
+  color: var(--second-text-color);
   text-transform: uppercase;
   font-size: 11px;
 }
@@ -24,7 +24,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: rgb(223, 223, 245);
+  background: var(--bg-color);
   border-radius: 50px;
   padding: 15px;
   font-size: 16px;

@@ -1,18 +1,9 @@
-import React from 'react'
 import { NavLink } from 'react-router-dom'
+import { months, getLastDateOfWeek, today } from '../../utils/Utils'
+import { NavigationProps } from '../../utils/Types'
+import './Navigation.css'
 import { MdOutlineArrowBackIosNew } from 'react-icons/md'
 import { MdOutlineArrowForwardIos } from 'react-icons/md'
-import { months, getLastDateOfWeek, today } from '../../utils/Utils'
-import './Navigation.css'
-
-interface NavigationProps {
-  currentDateState: Date
-  setCurrentDateState: React.Dispatch<React.SetStateAction<Date>>
-  handleBackwardButton: () => void
-  handleForwardButton: () => void
-  viewType: string
-  handleViewTypeChange: (viewType: string) => void
-}
 
 export default function Navigation({
   currentDateState,
@@ -25,6 +16,7 @@ export default function Navigation({
   const monthDay: number = currentDateState.getDate()
   const currentYear = currentDateState.getFullYear()
   const currentMonth = months[currentDateState.getMonth()]
+
   const lastDateOfWeek = getLastDateOfWeek(currentDateState)
   const weekSecondMonth = months[lastDateOfWeek.getMonth()]
   const weekSecondYear = lastDateOfWeek.getFullYear()
@@ -54,55 +46,57 @@ export default function Navigation({
 
   return (
     <>
-      <div className="top-grid">
-        <nav className="navbar">
-          <div className="navbar-today">
-            <button className="button-today" onClick={handleTodayClick}>
-              Today
-            </button>
+      <nav className="navbar">
+        <div className="navbar-header">
+          <div className="header-calc">calendar</div>
+          <div className="header-today">{today.getDate()}</div>
+        </div>
+        <div className="navbar-today">
+          <button className="today-btn" onClick={handleTodayClick}>
+            Today
+          </button>
+        </div>
+        <div className="navbar-date-bar">
+          <button className="backward-btn" onClick={handleBackwardButton}>
+            <MdOutlineArrowBackIosNew />
+          </button>
+          <button className="forward-btn" onClick={handleForwardButton}>
+            <MdOutlineArrowForwardIos />
+          </button>
+          <div className="navbar-date">{renderDateForNav(viewType)}</div>
+        </div>
+        <ul className="navbar-menu">
+          <div className="links">
+            <li>
+              <NavLink
+                to="./day"
+                className={`link ${viewType === 'day' && 'active'}`}
+                onClick={() => handleViewTypeChange('day')}
+              >
+                Day
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="./week"
+                className={`link ${viewType === 'week' && 'active'}`}
+                onClick={() => handleViewTypeChange('week')}
+              >
+                Week
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="./month"
+                className={`link ${viewType === 'month' && 'active'}`}
+                onClick={() => handleViewTypeChange('month')}
+              >
+                Month
+              </NavLink>
+            </li>
           </div>
-          <div className="navbar-date-bar">
-            <button className="button-backward" onClick={handleBackwardButton}>
-              <MdOutlineArrowBackIosNew />
-            </button>
-            <button className="button-forward" onClick={handleForwardButton}>
-              <MdOutlineArrowForwardIos />
-            </button>
-            <div className="navbar-date">{renderDateForNav(viewType)}</div>
-          </div>
-          <ul className="navbar-links">
-            <div className="menu">
-              <li>
-                <NavLink
-                  to="./day"
-                  className={`menu-link ${viewType === 'day' && 'active'}`}
-                  onClick={() => handleViewTypeChange('day')}
-                >
-                  Day
-                </NavLink>
-              </li>
-              <li>
-                <NavLink
-                  to="./week"
-                  className={`menu-link ${viewType === 'week' && 'active'}`}
-                  onClick={() => handleViewTypeChange('week')}
-                >
-                  Week
-                </NavLink>
-              </li>
-              <li>
-                <NavLink
-                  to="./month"
-                  className={`menu-link ${viewType === 'month' && 'active'}`}
-                  onClick={() => handleViewTypeChange('month')}
-                >
-                  Month
-                </NavLink>
-              </li>
-            </div>
-          </ul>
-        </nav>
-      </div>
+        </ul>
+      </nav>
     </>
   )
 }

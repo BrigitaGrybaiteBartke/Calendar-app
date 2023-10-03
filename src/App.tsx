@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import {
-  convertToUTCDateObject,
+  filterTasksForCurrentDay,
+  filterTasksForCurrentWeek,
+  getFirstDateOfWeek,
+  getLastDateOfWeek,
   getNextWeek,
   getPreviousWeek,
   getviewType,
@@ -10,12 +13,24 @@ import {
 } from './utils/Utils'
 import Navigation from './components/navigation/Navigation'
 import './App.css'
-import SingleDayPage from './components/dayPage/SingleDayPage'
+import DayPage from './components/dayPage/DayPage'
 import AddTaskForm from './components/taskAddForm/TaskAddForm'
-import WeekDayPage from './components/weekPage/WeekDayPage'
+import WeekPage from './components/weekPage/WeekPage'
 import './components/taskAddForm/TaskAddForm.css'
 import './components/taskUpdateForm/TaskUpdateForm.css'
 import TaskUpdateForm from './components/taskUpdateForm/TaskUpdateForm'
+import {
+  deleteDataRequest,
+  fetchDataRequest,
+  postDataRequest,
+  putDataRequest,
+  url,
+} from './utils/Api'
+
+import './assets/Form.css'
+import './assets/TaskBox.css'
+
+import { TfiPlus } from 'react-icons/tfi'
 
 interface Task {
   id: string
@@ -31,100 +46,89 @@ export default function App() {
   const [viewType, setViewType] = useState(getviewType())
 
   const [showUpdateForm, setShowUpdateForm] = useState(false)
+  const [showAddForm, setShowAddForm] = useState(false)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
 
-  const url = 'http://localhost:8000/tasks'
+  const currentDayTasks = filterTasksForCurrentDay(tasks, currentDateState)
+  const firstDateOfWeek = getFirstDateOfWeek(currentDateState)
+  const lastDateOfWeek = getLastDateOfWeek(currentDateState)
+
+  const currentWeekTasks = filterTasksForCurrentWeek(
+    tasks,
+    firstDateOfWeek,
+    lastDateOfWeek,
+  )
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const response = await fetch(url)
+    const fetchDataAsync = async () => {
+      const response = await fetchDataRequest(url)
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch data')
-        }
+      // console.log(response)
 
-        const data = await response.json()
-
-        console.log(data)
-        const tasksWithLocalTime = data.map((task: Task) => {
-          const utcTimeStamp = task.date
-
-          const date = new Date(utcTimeStamp)
-
-          const localTime = date.toString()
-
-          return {
-            ...task,
-            date: localTime,
-          }
-        })
-
-        setTasks(tasksWithLocalTime)
-      } catch (error) {
-        console.error('Error:', error)
+      if (response instanceof Error) {
+        console.log(response.message)
       }
+
+      setTasks(response)
+      return response
     }
 
-    fetchData()
-  }, [viewType])
+    fetchDataAsync()
+  }, [viewType, currentDateState])
 
   const handleDeleteTask = async (taskId: string) => {
-    try {
-      const response = await fetch(`${url}/${taskId}`, {
-        method: 'DELETE',
-      })
-      const filteredTasks = tasks.filter((task) => task.id !== taskId)
-      setTasks(filteredTasks)
-    } catch (error) {
-      console.error(error)
+    const response = await deleteDataRequest(url, taskId)
+
+    if (response instanceof Error) {
+      console.log(response.message)
     }
+
+    const filteredTasks = tasks.filter((task) => task.id !== taskId)
+
+    setTasks(filteredTasks)
   }
 
-  const handleUpdateTask = async (updatedTask: Task) => {
-    try {
-      const response = await fetch(`${url}/${updatedTask.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedTask),
-      })
-      if (!response.ok) {
-        throw new Error('Failed to update task on the server')
-      }
+  const handleAddTask = async (newTask: Task, selectedDate: Date) => {
+    const response = await postDataRequest(url, newTask)
 
-      const updatedTasks = tasks.map((task) => {
-        return task.id === updatedTask.id ? updatedTask : task
-      })
+    console.log(response)
 
-      setTasks(updatedTasks)
-      setSelectedTask(updatedTask)
-    } catch (error) {
-      console.error(error)
+    if (response instanceof Error) {
+      console.log(response.message)
     }
+
+    const taskWithLocalTime = {
+      ...response,
+      date: new Date(response.date),
+    }
+
+    setCurrentDateState(() => selectedDate)
+
+    setTasks((prev) => [...prev, taskWithLocalTime])
   }
 
-  const handleAddTask = (newTask: Task, selectedDate: Date) => {
-    const timeString = newTask.startHour
+  const handleUpdateTask = async (updatedTask: Task, updatedDate: Date) => {
+    const response = await putDataRequest(url, updatedTask)
 
-    const [hours, minutes] = timeString.split(':')
-    const parsedHours = parseInt(hours)
-    const parsedMinutes = parseInt(minutes)
+    console.log(response)
 
-    const newSelectedDate = new Date(selectedDate)
-    newSelectedDate.setHours(parsedHours, parsedMinutes, 0, 0)
-
-    const utcDate = convertToUTCDateObject(newSelectedDate)
-
-    const updatedTask = {
-      ...newTask,
-      date: utcDate,
+    if (response instanceof Error) {
+      console.log(response.message)
     }
 
-    setCurrentDateState(new Date(selectedDate))
+    const taskWithLocalTime = {
+      ...response,
+      date: new Date(response.date),
+    }
 
-    setTasks((prevTasks) => [...prevTasks, updatedTask])
+    console.log(taskWithLocalTime)
+
+    const updatedTasks = tasks.map((task) => {
+      return task.id === taskWithLocalTime.id ? taskWithLocalTime : task
+    })
+
+    setTasks(updatedTasks)
+    setCurrentDateState(updatedDate)
   }
 
   const handleViewTypeChange = (viewType: string) => {
@@ -167,14 +171,16 @@ export default function App() {
   return (
     <>
       <BrowserRouter>
-        <Navigation
-          currentDateState={currentDateState}
-          setCurrentDateState={setCurrentDateState}
-          handleBackwardButton={handleBackwardButton}
-          handleForwardButton={handleForwardButton}
-          viewType={viewType}
-          handleViewTypeChange={handleViewTypeChange}
-        />
+        <div className="top-grid">
+          <Navigation
+            currentDateState={currentDateState}
+            setCurrentDateState={setCurrentDateState}
+            handleBackwardButton={handleBackwardButton}
+            handleForwardButton={handleForwardButton}
+            viewType={viewType}
+            handleViewTypeChange={handleViewTypeChange}
+          />
+        </div>
         <TaskUpdateForm
           showUpdateForm={showUpdateForm}
           onRequestClose={() => {
@@ -185,38 +191,57 @@ export default function App() {
           onUpdate={handleUpdateTask}
         />
         <div className="side-grid">
+          <button
+            type="submit"
+            className="side-add-btn"
+            onClick={() => setShowAddForm((prev) => !prev)}
+          >
+            <TfiPlus />
+            <span className="side-btn-text">add</span>
+          </button>
+
           <AddTaskForm
+            showAddForm={showAddForm}
+            onRequestClose={() => {
+              setShowAddForm((prev) => !prev)
+            }}
             onAddTask={handleAddTask}
             currentDateState={currentDateState}
           />
         </div>
-        <Routes>
-          <Route path="/" element={<Navigate to="/day" />} />
-          <Route
-            path="/day"
-            element={
-              <SingleDayPage
-                currentDateState={currentDateState}
-                tasks={tasks}
-                setTasks={setTasks}
-                isToday={isToday}
-                setShowUpdateForm={setShowUpdateForm}
-                setSelectedTask={setSelectedTask}
-              />
-            }
-          />
-          <Route
-            path="/week"
-            element={
-              <WeekDayPage
-                currentDateState={currentDateState}
-                tasks={tasks}
-                setTasks={setTasks}
-                isToday={isToday}
-              />
-            }
-          />
-        </Routes>
+        <div className="content-grid">
+          <Routes>
+            <Route path="/" element={<Navigate to="/day" />} />
+            <Route
+              path="/day"
+              element={
+                <DayPage
+                  currentDateState={currentDateState}
+                  tasks={tasks}
+                  setTasks={setTasks}
+                  isToday={isToday}
+                  setShowUpdateForm={setShowUpdateForm}
+                  setSelectedTask={setSelectedTask}
+                  currentDayTasks={currentDayTasks}
+                />
+              }
+            />
+            <Route
+              path="/week"
+              element={
+                <WeekPage
+                  currentDateState={currentDateState}
+                  tasks={tasks}
+                  setTasks={setTasks}
+                  isToday={isToday}
+                  currentWeekTasks={currentWeekTasks}
+                  setShowUpdateForm={setShowUpdateForm}
+                  setSelectedTask={setSelectedTask}
+                />
+              }
+            />
+          </Routes>
+        </div>
       </BrowserRouter>
     </>
   )
