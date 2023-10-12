@@ -1,15 +1,15 @@
 import React, { useState } from 'react'
-import { TaskAddFormProps } from '../../utils/Types'
 import '../taskAddForm/TaskAddForm.css'
 import { TfiClose } from 'react-icons/tfi'
 import { TfiCheck } from 'react-icons/tfi'
+import { AddTaskFormProps } from '../../utils/Types'
 
-export default function TaskAddForm({
+export default function AddTaskForm({
   currentDateState,
-  onAddTask,
   showAddForm,
-  onRequestClose,
-}: TaskAddFormProps) {
+  onAdd,
+  onClose,
+}: AddTaskFormProps) {
   const [selectedDate, setSelectedDate] = useState<Date>(currentDateState)
 
   const [taskDetails, setTaskDetails] = useState({
@@ -62,7 +62,7 @@ export default function TaskAddForm({
     const newSelectedDate = new Date(selectedDate)
     newSelectedDate.setHours(parsedHours, parsedMinutes, 0, 0)
 
-    if (onAddTask) {
+    if (onAdd) {
       const newTask = {
         id: Date.now().toString(),
         name: taskDetails.name,
@@ -71,8 +71,7 @@ export default function TaskAddForm({
         endHour: taskDetails.endHour,
       }
 
-      onAddTask(newTask, newSelectedDate)
-      onRequestClose()
+      onAdd(newTask, newSelectedDate)
     }
 
     setTaskDetails({
@@ -83,16 +82,22 @@ export default function TaskAddForm({
     })
   }
 
+  const handleClose = (componentIdentifier: string) => {
+    setTaskDetails({
+      name: '',
+      date: selectedDate,
+      startHour: '',
+      endHour: '',
+    })
+
+    onClose(componentIdentifier)
+  }
+
   return showAddForm ? (
     <>
       <div className="modal">
         <div className="modal-content">
-          <button
-            className="close-btn"
-            onClick={() => {
-              onRequestClose()
-            }}
-          >
+          <button className="close-btn" onClick={() => handleClose('addForm')}>
             <TfiClose />
           </button>
           <form onSubmit={handleSubmit} className="form">
@@ -113,7 +118,7 @@ export default function TaskAddForm({
                 type="date"
                 name="date"
                 onChange={handleInputChange}
-                required
+                // required
               />
             </div>
             <div className="input-container">
@@ -142,6 +147,14 @@ export default function TaskAddForm({
               <button type="submit" className="add-btn">
                 <TfiCheck />
                 <span className="btn-text">add</span>
+              </button>
+              <button
+                type="button"
+                className="cancel-btn"
+                onClick={() => handleClose('addForm')}
+              >
+                <TfiClose />
+                <span className="btn-text">cancel</span>
               </button>
             </div>
           </form>

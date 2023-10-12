@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react'
-import { Task, TaskUpdateFormProps } from '../../utils/Types'
+import { Task, UpdateTaskFormProps } from '../../utils/Types'
 import '../taskUpdateForm/TaskUpdateForm.css'
 import { TfiTrash } from 'react-icons/tfi'
 import { TfiClose } from 'react-icons/tfi'
 import { TfiCheck } from 'react-icons/tfi'
 
-export default function TaskUpdateForm({
+export default function UpdateTaskForm({
   selectedTask,
   showUpdateForm,
-  onRequestClose,
   onDelete,
   onUpdate,
-}: TaskUpdateFormProps) {
+  onClose,
+}: UpdateTaskFormProps) {
   const [updatedTaskDetails, setUpdatedTaskDetails] = useState<Task>({
     id: '',
     name: '',
@@ -87,14 +87,16 @@ export default function TaskUpdateForm({
       }
 
       onUpdate(updatedTask, newUpdatedDate)
-      onRequestClose()
     }
   }
 
   const handleDelete = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault()
     selectedTask && onDelete(selectedTask.id)
-    onRequestClose()
+  }
+
+  const handleClose = (componentIdentifier: string) => {
+    onClose(componentIdentifier)
   }
 
   return showUpdateForm ? (
@@ -103,9 +105,7 @@ export default function TaskUpdateForm({
         <div className="modal-content">
           <button
             className="close-btn"
-            onClick={() => {
-              onRequestClose()
-            }}
+            onClick={() => handleClose('updateForm')}
           >
             <TfiClose />
           </button>
@@ -152,10 +152,7 @@ export default function TaskUpdateForm({
               <button
                 type="button"
                 className="cancel-btn"
-                onClick={(e) => {
-                  e.preventDefault()
-                  onRequestClose()
-                }}
+                onClick={() => handleClose('updateForm')}
               >
                 <TfiClose />
                 <span className="btn-text">cancel</span>

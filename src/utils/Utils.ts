@@ -1,12 +1,5 @@
 import { useState } from 'react'
-
-interface Task {
-  id: string
-  name: string
-  date: Date
-  startHour: string
-  endHour: string
-}
+import { Task } from './Types'
 
 export const hours = Array.from({ length: 24 }, (v, i) => i)
 
@@ -30,7 +23,7 @@ export const weekDayNames: string[] = [
   'Sunday',
 ]
 
-export const months = [
+export const months: string[] = [
   'January',
   'February',
   'March',
@@ -44,27 +37,6 @@ export const months = [
   'November',
   'December',
 ]
-
-export const calculateTopPosition = (taskStartTime: string) => {
-  if (taskStartTime) {
-    const [hours, minutes] = taskStartTime.split(':').map(Number)
-    const totalMinutes = hours * 60 + minutes
-
-    const timingCellHeight = 50
-    const minutesPerCell = 60
-    const timingCellIndex = Math.floor(totalMinutes / minutesPerCell)
-
-    return timingCellIndex * timingCellHeight + 29
-  }
-}
-
-export const calculateLeftPosition = (taskDate: Date) => {
-  const dayIndex = (taskDate.getDay() + 6) % 7
-
-  const cellWidth = 100 / 7
-  const leftCoords = dayIndex * cellWidth
-  return leftCoords
-}
 
 export const today: Date = new Date()
 
@@ -83,14 +55,16 @@ export const getMonthDayNumber = (d: Date): number => {
   return monthDay
 }
 
-export const useCurrentDateState = () => {
-  const initialDate = new Date(today)
-  initialDate.setHours(0, 0, 0, 0)
-  const [currentDateState, setCurrentDateState] = useState(initialDate)
-  return { currentDateState, setCurrentDateState }
+export const isToday = (dateToCheck: Date): boolean => {
+  return (
+    dateToCheck.getFullYear() === today.getFullYear() &&
+    dateToCheck.getMonth() === today.getMonth() &&
+    dateToCheck.getDay() === today.getDay() &&
+    dateToCheck.getDate() === today.getDate()
+  )
 }
 
-export const getFirstDateOfWeek = (d: Date = new Date()) => {
+export const getFirstDateOfWeek = (d: Date = new Date()): Date => {
   const date = new Date(d)
   const day = date.getDay()
   const diff = date.getDate() - day + (day === 0 ? -6 : 1)
@@ -107,6 +81,28 @@ export const getLastDateOfWeek = (d: Date) => {
   return lastDateOfWeek
 }
 
+export const getPreviousDay = (currentDate: Date) => {
+  const previousDay = new Date(currentDate)
+  previousDay.setDate(previousDay.getDate() - 1)
+  return previousDay
+}
+
+export const getNextDay = (currentDate: Date) => {
+  const nextDay = new Date(currentDate)
+  nextDay.setDate(nextDay.getDate() + 1)
+  return nextDay
+}
+
+export const getPreviousWeek = (currentDate: Date) => {
+  const dateCopy = new Date(currentDate.getTime())
+  const peviousMonday = new Date(
+    dateCopy.setDate(
+      dateCopy.getDate() - ((7 - dateCopy.getDay() + 1) % 7 || 7),
+    ),
+  )
+  return peviousMonday
+}
+
 export const getNextWeek = (date: Date = new Date()) => {
   const dateCopy = new Date(date.getTime())
   const nextMonday = new Date(
@@ -115,16 +111,6 @@ export const getNextWeek = (date: Date = new Date()) => {
     ),
   )
   return nextMonday
-}
-
-export const getPreviousWeek = (date: Date = new Date()) => {
-  const dateCopy = new Date(date.getTime())
-  const peviousMonday = new Date(
-    dateCopy.setDate(
-      dateCopy.getDate() - ((7 - dateCopy.getDay() + 1) % 7 || 7),
-    ),
-  )
-  return peviousMonday
 }
 
 export const getviewType = () => {
@@ -137,6 +123,13 @@ export const getviewType = () => {
     return 'month'
   }
   return 'day'
+}
+
+export const useCurrentDateState = () => {
+  const initialDate = new Date(today)
+  initialDate.setHours(0, 0, 0, 0)
+  const [currentDateState, setCurrentDateState] = useState<Date>(initialDate)
+  return { currentDateState, setCurrentDateState }
 }
 
 export const filterTasksForCurrentDay = (tasks: Task[], currentDate: Date) => {
@@ -161,4 +154,66 @@ export const filterTasksForCurrentWeek = (
     const taskDate = new Date(task.date)
     return taskDate >= startDate && taskDate <= endDate
   })
+}
+
+export const calculateTime = (
+  e: any,
+  timingCellHeight = 50,
+  minutesPerCell = 60,
+) => {
+  const rect = e.target.getBoundingClientRect()
+
+  const updatedY = e.clientY - rect.top
+
+  const timingCellIndex = Math.floor(updatedY / timingCellHeight)
+
+  const movedMinutes = timingCellIndex * minutesPerCell
+  const movedHours = Math.floor(movedMinutes / 60)
+  const movedMinutesRemainder = movedMinutes % 60
+
+  const updatedX = e.clientX - rect.left
+  const dayBoxIndex = Math.floor(updatedX / (rect.width / 7))
+
+  return {
+    rect,
+    timingCellIndex,
+    dayBoxIndex,
+    movedMinutes,
+    movedHours,
+    movedMinutesRemainder,
+    minutesPerCell,
+    timingCellHeight,
+  }
+}
+
+export const calculateTopPosition = (
+  taskStartTime: string,
+  timingCellHeight = 50,
+  minutesPerCell = 60,
+) => {
+  if (taskStartTime) {
+    const [hours, minutes] = taskStartTime.split(':').map(Number)
+    const totalMinutes = hours * 60 + minutes
+
+    const timingCellIndex = Math.floor(totalMinutes / minutesPerCell)
+
+    return timingCellIndex * timingCellHeight + 29
+  }
+}
+
+export const calculateLeftPosition = (taskDate: Date) => {
+  const dayIndex = (taskDate.getDay() + 6) % 7
+
+  const cellWidth = 100 / 7
+  const leftCoords = dayIndex * cellWidth
+  return leftCoords
+}
+
+export const convertUTCDateToLocalTime = (task: Task) => {
+  const utcTimeStamp = task.date
+  const date = new Date(utcTimeStamp)
+  return {
+    ...task,
+    date: date,
+  }
 }

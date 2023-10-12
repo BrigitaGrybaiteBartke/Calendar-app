@@ -1,14 +1,16 @@
 .navbar {
   display: flex;
+  justify-content: space-around;
   align-items: center;
+  width: 100%;
+  padding: 10px 0 10px;
   border-bottom: 1px solid grey;
 }
 
 .navbar .navbar-header {
   display: flex;
   justify-content: center;
-  align-items: center;
-  width: 20%;
+  width: 100%;
 }
 
 .navbar .navbar-header .header-calc {
@@ -33,8 +35,8 @@
 .navbar .navbar-today {
   display: flex;
   justify-content: flex-end;
-  margin-left: auto;
-  width: 25%;
+  margin-right: 15px;
+  width: 100%;
 }
 
 .navbar .navbar-today .today-btn {
@@ -56,8 +58,8 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
+  width: 100%;
   font-size: 18px;
-  margin-left: auto;
 }
 
 .navbar .navbar-date-bar .backward-btn,
@@ -90,7 +92,8 @@
 }
 
 .navbar .navbar-menu {
-  margin-left: auto;
+  /* margin-left: auto; */
+  width: 100%;
 }
 
 .navbar .navbar-menu .links {
@@ -101,7 +104,7 @@
 
 .navbar .navbar-menu .links li {
   list-style: none;
-  padding: 20px 14px;
+  padding-right: 15px;
 }
 
 .navbar .navbar-menu .links .link {

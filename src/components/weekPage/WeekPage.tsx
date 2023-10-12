@@ -3,6 +3,7 @@ import Timings from '../timings/Timings'
 import WeekDay from './WeekPageHeader'
 import {
   calculateLeftPosition,
+  calculateTime,
   calculateTopPosition,
   getFirstDateOfWeek,
   getLastDateOfWeek,
@@ -11,17 +12,14 @@ import {
 } from '../../utils/Utils'
 import './WeekPage.css'
 import '../../App.css'
-import { putDataRequest } from '../../utils/Api'
 import { TasksWithPosition, WeekPageProps } from '../../utils/Types'
 
 export default function WeekPage({
-  tasks,
-  setTasks,
   currentDateState,
   currentWeekTasks,
-  isToday,
   setShowUpdateForm,
   setSelectedTask,
+  onUpdate,
 }: WeekPageProps) {
   const firstDateOfWeek = getFirstDateOfWeek(currentDateState)
   const lastDateOfWeek = getLastDateOfWeek(currentDateState)
@@ -29,8 +27,6 @@ export default function WeekPage({
   const boxRefs = useRef<(HTMLDivElement | null)[]>([])
 
   const [isDragging, setIsDragging] = useState(false)
-
-  const url = 'http://localhost:8000/tasks'
 
   const tasksWithPosition: TasksWithPosition[] = currentWeekTasks.map(
     (task) => {
@@ -57,6 +53,7 @@ export default function WeekPage({
     if (!boxRefs.current || !containerRef.current) return
 
     const container = containerRef.current
+    const boxs = boxRefs.current
 
     const dragStart = (e: any) => {
       setIsDragging(true)
@@ -106,20 +103,15 @@ export default function WeekPage({
       )
         return
 
-      const rect = e.target.getBoundingClientRect()
-
-      const updatedY = e.clientY - rect.top
-
-      const timingCellHeight = 50
-      const minutesPerCell = 60
-      const timingCellIndex = Math.floor(updatedY / timingCellHeight)
-
-      const movedMinutes = timingCellIndex * minutesPerCell
-      const movedHours = Math.floor(movedMinutes / 60)
-      const movedMinutesRemainder = movedMinutes % 60
-
-      const updatedX = e.clientX - rect.left
-      const dayBoxIndex = Math.floor(updatedX / (rect.width / 7))
+      const {
+        rect,
+        dayBoxIndex,
+        movedHours,
+        movedMinutesRemainder,
+        minutesPerCell,
+        timingCellIndex,
+        timingCellHeight,
+      } = calculateTime(e)
 
       const startDateCoords = new Date(currentDateState)
       startDateCoords.setDate(firstDateOfWeek.getDate() + dayBoxIndex)
@@ -140,21 +132,7 @@ export default function WeekPage({
       const startHour = startDateCoords.toLocaleTimeString([], options)
       const endHour = endDateCoords.toLocaleTimeString([], options)
 
-      const updatedTasks = tasks.map((task) => {
-        if (task.id.toString() === id) {
-          return {
-            ...task,
-            date: startDateCoords,
-            startHour,
-            endHour,
-          }
-        }
-        return task
-      })
-
-      setTasks(updatedTasks)
-
-      const taskToUpdate = tasks.find((task) => task.id === id)
+      const taskToUpdate = currentWeekTasks.find((task) => task.id === id)
 
       if (!taskToUpdate) return
 
@@ -165,11 +143,7 @@ export default function WeekPage({
         endHour,
       }
 
-      const response = await putDataRequest(url, updatedTask)
-
-      if (response instanceof Error) {
-        console.log(response.message)
-      }
+      onUpdate(updatedTask, startDateCoords)
 
       if (draggable.className.includes('box')) {
         draggable.style.top = `${timingCellIndex * timingCellHeight + 10}px)`
@@ -180,10 +154,10 @@ export default function WeekPage({
       }
     }
 
-    boxRefs.current.forEach((boxRef) => {
-      if (boxRef) {
-        boxRef.addEventListener('dragstart', dragStart)
-        boxRef.addEventListener('dragend', dragEnd)
+    boxs.forEach((box) => {
+      if (box) {
+        box.addEventListener('dragstart', dragStart)
+        box.addEventListener('dragend', dragEnd)
       }
     })
 
@@ -191,16 +165,16 @@ export default function WeekPage({
     container.addEventListener('drop', drop)
 
     return () => {
-      boxRefs.current.forEach((boxRef) => {
-        if (boxRef) {
-          boxRef.removeEventListener('dragstart', dragStart)
-          boxRef.removeEventListener('dragend', dragEnd)
+      boxs.forEach((box) => {
+        if (box) {
+          box.removeEventListener('dragstart', dragStart)
+          box.removeEventListener('dragend', dragEnd)
         }
       })
       container.removeEventListener('dragover', dragOver)
       container.removeEventListener('drop', drop)
     }
-  }, [tasks, currentDateState])
+  }, [currentWeekTasks, currentDateState])
 
   return (
     <>
@@ -210,7 +184,6 @@ export default function WeekPage({
             weekDayNames={weekDayNames}
             firstDateOfWeek={firstDateOfWeek}
             lastDateOfWeek={lastDateOfWeek}
-            isToday={isToday}
           />
         </div>
         <div className="timing-container">

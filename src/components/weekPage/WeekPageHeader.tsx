@@ -1,11 +1,11 @@
 import { WeekPageHeaderProps } from '../../utils/Types'
+import { isToday } from '../../utils/Utils'
 import './WeekPageHeader.css'
 
 export default function WeekPageHeader({
   weekDayNames,
   firstDateOfWeek,
   lastDateOfWeek,
-  isToday,
 }: WeekPageHeaderProps) {
   const wholeWeek: Date[] = []
 
@@ -21,21 +21,19 @@ export default function WeekPageHeader({
     <>
       <div className="weekdays">
         {weekDayNames.map((day, dayIndex) => (
-          <>
+          <div key={dayIndex} className="day">
             <div className={`vertical-line-${dayIndex + 1}`} />
-            <div key={dayIndex} className="day">
-              <span className="day-name" data-day={day}>
-                {day}
-              </span>
-              <span
-                className={`month-day ${
-                  isToday(wholeWeek[dayIndex]) ? 'today' : ''
-                }`}
-              >
-                {wholeWeek[dayIndex].getDate()}
-              </span>
-            </div>
-          </>
+            <span className="day-name" data-day={day}>
+              {day}
+            </span>
+            <span
+              className={`month-day ${
+                isToday(wholeWeek[dayIndex]) ? 'today' : ''
+              }`}
+            >
+              {wholeWeek[dayIndex].getDate()}
+            </span>
+          </div>
         ))}
       </div>
     </>

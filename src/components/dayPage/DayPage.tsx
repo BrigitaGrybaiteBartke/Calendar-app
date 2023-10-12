@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import Timings from '../timings/Timings'
 import DayPageHeader from './DayPageHeader'
 import {
+  calculateTime,
   calculateTopPosition,
   getDayName,
   getMonthDayNumber,
@@ -10,16 +11,13 @@ import {
 import '../dayPage/DayPage.css'
 import '../timings/Timings.css'
 import { DayPageProps, TasksWithPosition } from '../../utils/Types'
-import { putDataRequest, url } from '../../utils/Api'
 
 export default function DayPage({
-  tasks,
-  setTasks,
   currentDateState,
-  isToday,
-  setShowUpdateForm,
-  setSelectedTask,
   currentDayTasks,
+  setSelectedTask,
+  setShowUpdateForm,
+  onUpdate,
 }: DayPageProps) {
   const dayName = getDayName(currentDateState)
   const monthDay = getMonthDayNumber(currentDateState)
@@ -50,15 +48,18 @@ export default function DayPage({
     if (!containerRef.current || !boxRefs.current) return
 
     const container = containerRef.current
+    const boxs = boxRefs.current
 
-    const dragStart = (e: any) => {
+    const dragStart = (e: DragEvent) => {
       setIsDragging(true)
 
       const targetElement = e.target as HTMLDivElement | null
 
       if (targetElement && targetElement.className.includes('box')) {
         targetElement.classList.add('dragging')
-        e.dataTransfer.setData('text/plain', targetElement.id)
+        if (e.dataTransfer) {
+          e.dataTransfer.setData('text/plain', targetElement.id)
+        }
       }
 
       setTimeout(() => {
@@ -66,7 +67,7 @@ export default function DayPage({
       }, 0)
     }
 
-    const dragEnd = (e: any) => {
+    const dragEnd = (e: DragEvent) => {
       setIsDragging(false)
 
       const targetElement = e.target as HTMLDivElement | null
@@ -76,20 +77,23 @@ export default function DayPage({
       }
     }
 
-    const dragOver = (e: any) => {
+    const dragOver = (e: DragEvent) => {
       setIsDragging(true)
 
-      if (e.dataTransfer.types[0] === 'text/plain') {
+      if (e.dataTransfer?.types[0] === 'text/plain') {
         e.preventDefault()
       }
     }
 
-    const drop = async (e: any) => {
+    const drop = async (e: DragEvent) => {
       e.preventDefault()
 
       setIsDragging(false)
 
-      const id = e.dataTransfer.getData('text/plain')
+      const id = e.dataTransfer?.getData('text/plain')
+
+      if (!id) return
+
       const draggable = document.getElementById(id)
 
       if (
@@ -97,21 +101,17 @@ export default function DayPage({
         !draggable ||
         !container ||
         draggable === e.target ||
-        draggable.contains(e.target)
+        draggable.contains(e.target as Node)
       )
         return
 
-      const rect = e.target.getBoundingClientRect()
-
-      const updatedY = e.clientY - rect.top
-
-      const timingCellHeight = 50
-      const minutesPerCell = 60
-      const timingCellIndex = Math.floor(updatedY / timingCellHeight)
-
-      const movedMinutes = timingCellIndex * minutesPerCell
-      const movedHours = Math.floor(movedMinutes / 60)
-      const movedMinutesRemainder = movedMinutes % 60
+      const {
+        movedHours,
+        movedMinutesRemainder,
+        minutesPerCell,
+        timingCellIndex,
+        timingCellHeight,
+      } = calculateTime(e)
 
       const startDateCoords = new Date(currentDateState)
       startDateCoords.setHours(movedHours, movedMinutesRemainder, 0, 0)
@@ -128,22 +128,7 @@ export default function DayPage({
       const startHour = startDateCoords.toLocaleTimeString([], options)
       const endHour = endDateCoords.toLocaleTimeString([], options)
 
-      const updatedTasks = tasks.map((task) => {
-        if (task.id.toString() === id) {
-          return {
-            ...task,
-            date: startDateCoords,
-            startHour,
-            endHour,
-          }
-        }
-        return task
-      })
-
-      setTasks(updatedTasks)
-
-      const taskToUpdate = tasks.find((task) => task.id === id)
-
+      const taskToUpdate = currentDayTasks.find((task) => task.id === id)
       if (!taskToUpdate) return
 
       const updatedTask = {
@@ -153,23 +138,22 @@ export default function DayPage({
         endHour,
       }
 
-      const response = await putDataRequest(url, updatedTask)
+      onUpdate(updatedTask, startDateCoords)
 
-      if (response instanceof Error) {
-        console.log(response.message)
-      }
-
-      if (draggable.className.includes('box')) {
+      if (
+        e.target instanceof HTMLElement &&
+        draggable.className.includes('box')
+      ) {
         draggable.style.top = `${timingCellIndex * timingCellHeight + 29}px)`
         draggable.classList.remove('hide')
         e.target.appendChild(draggable)
       }
     }
 
-    boxRefs.current.forEach((boxRef) => {
-      if (boxRef) {
-        boxRef.addEventListener('dragstart', dragStart)
-        boxRef.addEventListener('dragend', dragEnd)
+    boxs.forEach((box) => {
+      if (box) {
+        box.addEventListener('dragstart', dragStart)
+        box.addEventListener('dragend', dragEnd)
       }
     })
 
@@ -177,17 +161,17 @@ export default function DayPage({
     container.addEventListener('drop', drop)
 
     return () => {
-      boxRefs.current.forEach((boxRef) => {
-        if (boxRef) {
-          boxRef.removeEventListener('dragstart', dragStart)
-          boxRef.removeEventListener('dragend', dragEnd)
+      boxs.forEach((box) => {
+        if (box) {
+          box.removeEventListener('dragstart', dragStart)
+          box.removeEventListener('dragend', dragEnd)
         }
       })
 
       container.removeEventListener('dragover', dragOver)
       container.removeEventListener('drop', drop)
     }
-  }, [tasks, currentDateState])
+  }, [currentDayTasks, currentDateState])
 
   return (
     <>
@@ -196,7 +180,6 @@ export default function DayPage({
           <DayPageHeader
             dayName={dayName}
             monthDay={monthDay}
-            isToday={isToday}
             currentDateState={currentDateState}
           />
         </div>

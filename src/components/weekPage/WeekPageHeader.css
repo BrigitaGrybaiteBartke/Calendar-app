@@ -10,7 +10,7 @@
 .weekdays .day {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  justify-content: center;
   width: 15%;
 }
 
@@ -18,12 +18,14 @@
   color: var(--second-text-color);
   text-transform: uppercase;
   font-size: 11px;
+  margin: auto;
 }
 
 .weekdays .month-day {
   padding: 15px;
   margin: 5px;
   font-size: 16px;
+  margin: auto;
 }
 
 .weekdays .day .today {

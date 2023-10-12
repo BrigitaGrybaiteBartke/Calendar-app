@@ -1,10 +1,10 @@
 import { DayPageHeaderProps } from '../../utils/Types'
+import { isToday } from '../../utils/Utils'
 import './DayPageHeader.css'
 
 export default function DayPageHeader({
   dayName,
   monthDay,
-  isToday,
   currentDateState,
 }: DayPageHeaderProps) {
   return (
