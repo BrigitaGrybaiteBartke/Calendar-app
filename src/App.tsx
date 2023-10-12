@@ -53,7 +53,7 @@ export default function App() {
   useEffect(() => {
     const fetchDataAsync = async () => {
       try {
-        const response = await fetchDataRequest('http://localhost:8000/taskss')
+        const response = await fetchDataRequest(url)
 
         const tasksWithLocalTime = response.map((task: Task) =>
           convertUTCDateToLocalTime(task),
