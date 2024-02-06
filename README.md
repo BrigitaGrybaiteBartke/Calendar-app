@@ -10,13 +10,19 @@ This is a simple calendar application built with React and TypeScript. It allows
 
 * __Create Task:__ Easily create new tasks with details like task description, date, and time.
 
-* __Update Task:__ Modify existing tasks with ease.
+* __Update Task:__ Modify existing tasks, including the ability to update date and time.
 
 * __Delete Task:__ Remove tasks that are no longer needed.
 
-* __CRUD Operations:__ Full CRUD functionality implemented for seamless task management.
-
 * __Mock Data with json-server:__ Utilizes json-server to provide mock data for development and testing purposes.
+
+
+### Additional Functionality
+
+* __Real-time Task Updates:__ Upon creating a new task, the task appears automatically at the chosen time and date within the calendar.
+  
+* __Drag and Drop Functionality:__ In the week view, tasks can be moved to different times or dates through drag and drop interactions.
+  
 
 ### Technologies Used
 * __React:__ A JavaScript library for building user interfaces.
@@ -28,11 +34,11 @@ Follow these instructions to get the Calendar App up and running on your local m
 
 #### Installation
 
-1. Clone the repository to your local machine:
+* Clone the repository to your local machine:
  ``` git clone https://github.com/BrigitaGrybaiteBartke/Calendar-app.git```
-2. Navigate to the project directory:
+* Navigate to the project directory:
 ``` cd calendar-app ```
-3. Install dependencies: 
+* Install dependencies: 
 ``` npm install ```.
 
 #### Running the Application
@@ -41,4 +47,5 @@ To start the development server and json-server for mock data, run the following
 
 This will start both the React application and the json-server concurrently.
 
-Access the application in your browser at ___http://localhost:3000___.
+Access the application in your browser at [http://localhost:3000](http://localhost:3000).
+
